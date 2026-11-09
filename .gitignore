@@ -1,0 +1,33 @@
+# Local datasets and generated outputs
+data/raw/*
+!data/raw/**/.gitkeep
+!data/raw/**/PUT_*_HERE.txt
+data/processed/*
+!data/processed/**/README.md
+checkpoints/*
+!checkpoints/README.md
+outputs/*
+!outputs/**/README.md
+!outputs/**/.gitkeep
+
+# Model weights and checkpoint binaries
+*.pth
+*.pt
+*.bin
+*.tar
+*.ckpt
+*.onnx
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# OS & Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

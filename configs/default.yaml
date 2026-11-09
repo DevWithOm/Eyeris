@@ -1,0 +1,61 @@
+# Central configuration for 5-class Diabetic Retinopathy Classification
+# Base Model: EfficientNet-B0 trained on APTOS 2019 with IDRiD external validation
+
+seed: 42
+num_classes: 5
+
+class_names:
+  0: "0 - No DR"
+  1: "1 - Mild"
+  2: "2 - Moderate"
+  3: "3 - Severe"
+  4: "4 - Proliferative DR"
+
+class_names_short:
+  - "No DR"
+  - "Mild"
+  - "Moderate"
+  - "Severe"
+  - "Proliferative"
+
+# Dataset split ratios (Target: 70 / 15 / 15)
+split_ratios:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+
+# Clinical referable DR threshold:
+# Grades 0-1 = Non-Referable (0)
+# Grades 2-4 = Referable DR (1)
+referable_threshold: 2
+
+# Image Preprocessing & Augmentation
+image_size: 224
+crop_borders: true
+
+# Training Hyperparameters
+model_name: "efficientnet_b0"
+pretrained: true
+dropout: 0.3
+batch_size: 16
+epochs: 10
+learning_rate: 0.0001
+weight_decay: 0.0001
+
+# Loss & Class Imbalance
+use_class_weights: true
+class_weighting_method: "balanced"  # total / (num_classes * count)
+label_smoothing: 0.0
+
+# Paths (relative to project root)
+paths:
+  aptos_csv: "data/raw/aptos/train.csv"
+  aptos_images: "data/raw/aptos/train_images"
+  idrid_test_csv: "data/raw/idrid/disease_grading/2. Groundtruths/b. IDRiD_Disease Grading_Testing Labels.csv"
+  idrid_test_images: "data/raw/idrid/disease_grading/1. Original Images/b. Testing Set"
+  idrid_train_csv: "data/raw/idrid/disease_grading/2. Groundtruths/a. IDRiD_Disease Grading_Training Labels.csv"
+  idrid_train_images: "data/raw/idrid/disease_grading/1. Original Images/a. Training Set"
+  splits_dir: "data/splits"
+  checkpoints_dir: "checkpoints"
+  plots_dir: "outputs/plots"
+  reports_dir: "outputs/reports"
