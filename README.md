@@ -11,7 +11,6 @@ Modular diabetic-retinopathy screening research prototype.
 - `data/`: dataset directories and manifests.
 - `storage/`: local runtime files (ignored by Git).
 - `artifacts/`: model metadata and generated artifacts.
-
 ## Local setup
 1. Use Python 3.11 and Node.js LTS.
 2. Create a virtual environment and install `requirements-dev.txt`.
