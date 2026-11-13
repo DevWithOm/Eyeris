@@ -1,0 +1,8 @@
+classification:
+  model_name: baseline_classifier
+  version: 0.1.0
+segmentation:
+  model_name: baseline_unet
+  version: 0.1.0
+explainability:
+  method: gradcam

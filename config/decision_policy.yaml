@@ -1,0 +1,9 @@
+# Research placeholders only; thresholds require validation.
+referable_dr:
+  grades: [2, 3, 4]
+  probability_threshold: null
+uncertainty:
+  threshold: null
+fallback:
+  poor_quality: recapture_or_human_review
+  uncertain_prediction: human_review

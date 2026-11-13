@@ -1,0 +1,2 @@
+class ScreeningError(Exception):
+    pass

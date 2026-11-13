@@ -1,0 +1,7 @@
+project:
+  name: retina-screening
+  environment: development
+image:
+  accepted_formats: [.jpg, .jpeg, .png]
+  max_upload_mb: 15
+  color_space: RGB

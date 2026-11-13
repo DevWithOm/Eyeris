@@ -1,0 +1,6 @@
+database:
+  dialect: postgresql
+  host: localhost
+  port: 5432
+  name: retina_screening
+# Credentials must come from DATABASE_URL in the environment.

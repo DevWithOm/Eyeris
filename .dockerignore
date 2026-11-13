@@ -1,0 +1,12 @@
+.git
+.venv
+venv
+__pycache__
+.pytest_cache
+node_modules
+data/raw
+data/processed
+data/external
+storage
+artifacts/model_weights
+.env

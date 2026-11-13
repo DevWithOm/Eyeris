@@ -1,0 +1,4 @@
+model_name: baseline_classifier
+model_version: 0.1.0
+num_classes: 5
+input_size: [224, 224]

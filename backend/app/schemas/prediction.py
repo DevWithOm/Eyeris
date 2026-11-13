@@ -1,0 +1,1 @@
+# Define prediction response schemas.

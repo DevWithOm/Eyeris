@@ -1,0 +1,9 @@
+numpy>=1.26
+pandas>=2.1
+opencv-python-headless>=4.9
+scikit-learn>=1.4
+matplotlib>=3.8
+PyYAML>=6
+# Install torch/torchvision matching your CPU or CUDA environment from pytorch.org.
+torch
+torchvision
