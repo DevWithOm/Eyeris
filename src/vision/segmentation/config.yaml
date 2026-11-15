@@ -1,0 +1,36 @@
+# U-Net Lesion Segmentation Configuration
+
+dataset_root: "data/raw/IDRiD"
+val_fraction: 0.2
+seed: 42
+img_size: [256, 256]
+classes: ["MA", "HE", "EX", "SE"]
+
+# Model Architecture
+in_channels: 3
+num_classes: 4
+base_channels: 16
+bilinear: true
+
+# Training Hyperparameters
+batch_size: 4
+learning_rate: 0.0003
+weight_decay: 0.0001
+epochs: 15
+early_stopping_patience: 6
+alpha_bce: 1.0
+beta_dice: 1.0
+device: "cpu"
+
+# Directories
+checkpoint_dir: "outputs/segmentation/checkpoints"
+log_dir: "outputs/segmentation/logs"
+plot_dir: "outputs/segmentation/plots"
+prediction_dir: "outputs/segmentation/predictions"
+
+# Inference thresholds
+thresholds:
+  MA: 0.5
+  HE: 0.5
+  EX: 0.5
+  SE: 0.5

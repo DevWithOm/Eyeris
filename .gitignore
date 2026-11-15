@@ -32,14 +32,18 @@ data/processed/*
 data/external/*
 storage/uploads/*
 storage/processed/*
+*.zip
+*.tar.gz
+*.tar
 
-# Generated artifacts
+# Generated artifacts and outputs
 artifacts/model_weights/*
 artifacts/evaluation/*
 storage/predictions/*
 storage/heatmaps/*
 storage/segmentation_masks/*
 storage/reports/*
+outputs/
 
 # MATLAB
 *.asv
