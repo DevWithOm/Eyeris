@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 WORKDIR /app
-COPY requirements-backend.txt .
-RUN pip install --no-cache-dir -r requirements-backend.txt
+COPY requirements.txt requirements-backend.txt requirements-ml.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 COPY backend backend
 COPY integration integration
 COPY ai_models ai_models

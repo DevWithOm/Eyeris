@@ -32,6 +32,9 @@ data/processed/*
 data/external/*
 storage/uploads/*
 storage/processed/*
+storage/cases/*
+storage/*.db
+*.db
 
 # Generated artifacts
 artifacts/model_weights/*
