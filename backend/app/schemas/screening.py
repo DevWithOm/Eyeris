@@ -10,6 +10,7 @@ class ScreeningStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     REJECTED_QUALITY = "rejected_quality"
+    PENDING_REVIEW = "pending_review"
 
 class ClinicalDecision(BaseModel):
     referral_recommended: bool

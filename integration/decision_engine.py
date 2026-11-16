@@ -26,10 +26,11 @@ def evaluate_screening_decision(
 
     if not classification:
         return {
-            "referral_recommended": True,
+            "referral_recommended": False,
+            "review_required": True,
             "urgency": "manual_review",
-            "rationale": "Classification unavailable; clinical assessment required.",
-            "action_required": "Ophthalmologist review required.",
+            "rationale": "Automated DR classification model is unavailable. Clinical manual review required before referral determination.",
+            "action_required": "Ophthalmologist review required to evaluate retinal fundus.",
         }
 
     grade = classification.get("predicted_grade", 0)

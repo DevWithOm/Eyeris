@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
+from backend.app.core.config import settings
 
 from backend.app.db.session import get_db
 from backend.app.schemas.explanation import ExplanationDetailResponse
@@ -12,10 +13,19 @@ from backend.app.services.explanation_service import get_explanation_for_case
 from backend.app.services.report_service import get_report_for_case
 from backend.app.services.screening_service import (
     get_screening_by_case_id,
+    list_all_screenings,
     process_screening_upload,
 )
 
 router = APIRouter(prefix="/screenings", tags=["screenings"])
+
+@router.get("", response_model=list[ScreeningDetailResponse])
+def list_screenings(
+    limit: int = 50,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+):
+    return list_all_screenings(db=db, limit=limit, offset=offset)
 
 @router.post("", response_model=ScreeningResponse, status_code=status.HTTP_201_CREATED)
 async def submit_screening(
@@ -26,6 +36,14 @@ async def submit_screening(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File provided must be an image (JPEG or PNG).",
+        )
+
+    # Validate file size if available in header
+    max_bytes = settings.max_upload_mb * 1024 * 1024
+    if file.size and file.size > max_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Uploaded file exceeds maximum allowed limit of {settings.max_upload_mb} MB.",
         )
 
     try:
