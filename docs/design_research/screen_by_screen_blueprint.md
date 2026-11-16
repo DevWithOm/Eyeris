@@ -1,24 +1,24 @@
-# EYERIS — Screen-by-Screen UI/UX Design Blueprint (Revision 1)
+# EYERIS — Screen-by-Screen UI/UX Design Blueprint (Revision 2)
 **Subsystem**: UI/UX Architecture & Screen Specifications  
-**Role**: Senior Product Designer & Healthcare UX Architect (Member 4)  
+**Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
+**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
 
 ---
 
-## 1. Member 4 Approved Design Decisions
+## 1. Member 4 Approved Design Decisions (Revision 2 Final)
 
-This revised screen blueprint incorporates the following core governance rules:
+This revised screen blueprint incorporates the following audited decisions:
 1. **Primary Technical Showcase**: Designates **Screen 4: Screening Details (Retinal Image Analysis Workspace)** as the primary technical and clinical centerpiece of the system.
-2. **Wireframe Value Labeling**: Removes all unannotated numerical figures that could be mistaken for live clinical results. All figures are explicitly labeled as `[Example Wireframe Value: e.g. N]` or `[Example Schema Value]`.
+2. **Explicitly Labeled Illustrative Content**: Removes all unannotated numerical figures. Every wireframe case, score, percentage, lesion count, date, and patient ID is explicitly labeled as `[Illustrative Example: e.g. N]` or neutral schema placeholders.
 3. **Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are explicitly designated as configurable engineering parameters awaiting clinical dataset calibration.
 4. **Causality Guardrail**: The retinal workspace includes an obligatory notice: *"Class activation heatmaps visualize deep network feature correlations and do not demonstrate anatomical lesion causality."*
-5. **Architectural Separation of States**: Fully decouples:
-   - *Model Unavailability* (`status: "pending_review"`, manual clinical assessment required).
-   - *Quality Failure* (`is_gradable: false`, recapture mandatory, classification aborted).
-   - *Model Uncertainty* (`uncertainty_detected: true`, specialist review gate).
-   - *Clinical Referral* (ICDR stage-based clinical guidance: routine, prompt, urgent).
+5. **Strict Clinical State Precedence**:
+   - *Precedence 1 (State B): Image Quality Failure* — Halts grading; requires recapture (or clinical review if recapture fails); referral is invalid/false; never overridden by model confidence.
+   - *Precedence 2 (State A): Model Unavailable* — Classification withheld; clinical review required; no negative result inferred; no automated referral.
+   - *Precedence 3 (State C): High Model Uncertainty* — Classification withheld or marked uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`.
+   - *Precedence 4 (State D): Referral Decision* — Referral indication, urgency tier, and human review requirements are supplied directly by backend policy; no hardcoded universal urgency mapping or invented timeframes in the frontend.
 6. **Role-Aware Presentation Layer**: Operator Mode and Specialist Mode share the exact same underlying pipeline API and decision payload; they represent presentation-only view toggles.
 7. **Accessible Fundus Inspection**: The raw, true-color fundus photograph is guaranteed to be accessible at all times via opacity sliders ($0–100\%$), dual-pane comparison, and spacebar reveal.
 8. **Multi-Channel Accessibility**: Color is never the sole indicator; every state has an icon, text, and numeric level.
@@ -28,11 +28,11 @@ This revised screen blueprint incorporates the following core governance rules:
 ## Screen 1: Dashboard
 
 ### 1.1 Purpose & Primary Users
-- **Purpose**: Operational control center tracking genuine screening counts from the database, pending manual reviews, quality failure rates, and system telemetry.
+- **Purpose**: Operational overview tracking genuine screening counts from the database, pending manual reviews, quality failure rates, and system telemetry.
 - **Primary Users**: Screening Operators, Clinic Administrators, Reviewing Ophthalmologists.
 
 ### 1.2 Layout Wireframe
-*(Note: All wireframe numbers are illustrative schema mockups and do not represent actual patient data).*
+*(Note: All wireframe numbers are illustrative schema mockups and do not represent actual clinical patient screening results).*
 
 ```
 +---------------------------------------------------------------------------------------------------------+
@@ -40,11 +40,11 @@ This revised screen blueprint incorporates the following core governance rules:
 +---------------------------------------------------------------------------------------------------------+
 | [Disclaimer] Research screening prototype (SIH PS26038). Not for primary diagnosis.                   |
 +---------------------------------------------------------------------------------------------------------+
-| [Quick Operational Telemetry Bar - Derived Strictly from Database Records]                              |
+| [Operational Telemetry Bar - Derived Strictly from Database Records]                                    |
 | +--------------------+ +--------------------+ +--------------------+ +--------------------+             |
 | | Total Screenings   | | Urgent Referrals   | | Pending Review     | | Quality Rejections |             |
-| | [Ex: e.g. 128]     | | [Ex: e.g. 14]      | | [Ex: e.g. 6]       | | [Ex: e.g. 3]       |             |
-| | (Real DB count)    | | (Grades 3-4)       | | (Uncertain/Offline)| | (Quality < 0.60)   |             |
+| | [Illustrative: 128]| | [Illustrative: 14] | | [Illustrative: 6]  | | [Illustrative: 3]  |             |
+| | (Total DB Records) | | (Backend Policy)   | | (Offline/Uncertain)| | (Quality < 0.60)   |             |
 | +--------------------+ +--------------------+ +--------------------+ +--------------------+             |
 +---------------------------------------------------------------------------------------------------------+
 | [Operations Grid: 2 Columns (70% Left / 30% Right)]                                                     |
@@ -53,10 +53,10 @@ This revised screen blueprint incorporates the following core governance rules:
 | +---------------------------------------------------+ | +---------------------------------------------+ |
 | | [Search Case ID...] [Filter: All / Referrals]     | | | Quick Actions:                              | |
 | | +-----------------------------------------------+ | | | [ + Start New Screening ]                   | |
-| | | Case ID   | Exam Date | Grade   | Urgency| Act| | | | [ View Pending Review Queue ([Ex: e.g. 6]) ] | |
-| | | EYE-A1B2  | Today     | Mod [2] | Routine|View| | | +---------------------------------------------+ |
-| | | EYE-9F40  | Today     | PDR [4] | URGENT |View| | | AI Model Availability Subsystems:             | |
-| | | EYE-3C81  | Today     | Ungrad  | RECAP  |View| | | - Quality Check:  🟢 Operational (Heuristic) | |
+| | | Case ID   | Exam Date | Grade   | Urgency| Act| | | | [ View Pending Review Queue ([Ex: 6]) ]     | |
+| | | EYE-A1B2  | [Ex:Date] | Mod [2] | Policy |View| | | +---------------------------------------------+ |
+| | | EYE-9F40  | [Ex:Date] | PDR [4] | Policy |View| | | AI Model Availability Subsystems:             | |
+| | | EYE-3C81  | [Ex:Date] | Ungrad  | RECAP  |View| | | - Quality Check:  🟢 Operational (Heuristic) | |
 | | +-----------------------------------------------+ | | | - DR Classifier:  🟡 Offline (Safe Fallback)| |
 | | (Link to full Screening History Registry)         | | | - Segmentation:   🟡 Offline (Safe Fallback)| |
 | +---------------------------------------------------+ | | - Explainability: 🟡 Offline (Safe Fallback)| |
@@ -107,13 +107,14 @@ This revised screen blueprint incorporates the following core governance rules:
 +---------------------------------------------------------------------------------------------------------+
 ```
 
-### 2.3 Instant Quality Rejection Handling (State B)
+### 2.3 Instant Quality Rejection Handling (State B — Precedence 1)
 If the backend quality evaluation yields `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`:
-- Downstream deep classification is aborted to prevent misleading reassurance.
+- Automated grading is **strictly halted**. No reassuring grade or referral is derived.
 - An amber **Quality Warning Modal** appears:
   - Header: `[⚠] Image Quality Insufficient for Automated Screening`
   - Cause: `Severe blur / corneal reflection detected in macular field.`
-  - Action: `[ Recapture Retinal Photograph ]` (Resets the dropzone while the patient is still seated).
+  - Action: `[ Recapture Retinal Photograph ]`
+  - Fallback: If recapture is unavailable or repeatedly fails, the case is flagged for manual clinical review (`urgency: "manual_review"`).
 
 ---
 
@@ -128,7 +129,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-| [Header] Screening History Registry ([Example Total: e.g. 128])                  [ 📥 Export CSV ]       |
+| [Header] Screening History Registry ([Illustrative Total: e.g. 128])             [ 📥 Export CSV ]       |
 +---------------------------------------------------------------------------------------------------------+
 | [Filter Bar]                                                                                            |
 | [ 🔍 Search Case ID or Token... ] [ Status: All ▼ ] [ Urgency: All ▼ ] [ Eye: All ▼ ] [ Sort: Date ▼ ]  |
@@ -137,11 +138,12 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
 | | Case ID     | Screening Date   | Eye | Quality  | DR Grade  | Referral Urgency   | Action           | |
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
-| | EYE-9F4081  | [Ex: 16-Nov-26]  | OD  | [Ex:0.94]| [Ex: G4]  | 🔴 [⯄] URGENT REF  | [ Open Analysis ]| |
-| | EYE-A1B290  | [Ex: 16-Nov-26]  | OS  | [Ex:0.88]| [Ex: G2]  | 🟡 [◆] ROUTINE REF | [ Open Analysis ]| |
-| | EYE-5E2104  | [Ex: 16-Nov-26]  | OD  | [Ex:0.92]| [Ex: G0]  | 🟢 [●] ANNUAL MON  | [ Open Analysis ]| |
-| | EYE-3C8144  | [Ex: 16-Nov-26]  | OS  | [Ex:0.42]| Ungraded  | 🔴 [⚠] RECAPTURE   | [ Open Analysis ]| |
-| | EYE-7B1990  | [Ex: 15-Nov-26]  | OD  | [Ex:0.85]| Pending   | 🟣 [⏸] MANUAL REV  | [ Open Analysis ]| |
+| | EYE-9F4081  | [Illustrative]   | OD  | [Ex:0.94]| [Ex: G4]  | 🔴 [⯄] Urgent Ref  | [ Open Analysis ]| |
+| | EYE-A1B290  | [Illustrative]   | OS  | [Ex:0.88]| [Ex: G2]  | 🟡 [◆] Routine Ref | [ Open Analysis ]| |
+| | EYE-5E2104  | [Illustrative]   | OD  | [Ex:0.92]| [Ex: G0]  | 🟢 [●] Annual Mon  | [ Open Analysis ]| |
+| | EYE-3C8144  | [Illustrative]   | OS  | [Ex:0.42]| Ungraded  | 🔴 [⚠] Recapture   | [ Open Analysis ]| |
+| | EYE-7B1990  | [Illustrative]   | OD  | [Ex:0.85]| Pending   | 🟣 [⏸] Manual Rev  | [ Open Analysis ]| |
+| | EYE-2D8812  | [Illustrative]   | OS  | [Ex:0.91]| Uncertain | 🟣 [🛡] Not Det.   | [ Open Analysis ]| |
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
 | [Pagination: Showing 1 - 25 of 128 records]                     [ < Previous ] [ 1 ] [ 2 ] [ Next > ]   |
 +---------------------------------------------------------------------------------------------------------+
@@ -156,40 +158,40 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 - **Primary Users**: Consulting Ophthalmologists, Retina Specialists.
 
 ### 4.2 Layout Wireframe (60% Retinal Canvas / 40% Clinical Telemetry)
-*(All numerical metrics are labeled illustrative examples).*
+*(All numerical metrics and findings are labeled illustrative examples).*
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-| [Top Bar] Case ID: EYE-9F4081 | Patient: #EX-8942 | Eye: Right (OD) | Date: 16-Nov-2026 | [ 🖨 Report ]   |
+| [Top Bar] Case ID: EYE-9F4081 | Patient: #EX-8942 | Eye: Right (OD) | Date: [Illustrative] | [ 🖨 Report ]|
 +---------------------------------------------------------------------------------------------------------+
-| [Triage Banner: 🔴 [⯄] URGENT REFERRAL RECOMMENDED — Vision-Threatening Retinopathy Suspected]          |
+| [Triage Banner: 🔴 [⯄] [Illustrative Policy Output: Referral Indicated — High Urgency per Backend Policy]]|
 +---------------------------------------------------+-----------------------------------------------------+
 | LEFT PANE: Retinal Fundus Viewport (60% Width)    | RIGHT PANE: Diagnostic Telemetry (40% Width)        |
 |                                                   |                                                     |
 | [Viewport Toolbar: Height 42px]                   | 1. DR Disease Severity Staging (ICDR 0–4)           |
 | Layer: [ (•) Grad-CAM  ( ) Lesions  ( ) Raw ]     | +-------------------------------------------------+ |
-| Opacity: [----●----------] [Ex: 65%]  [ 🔍 ] [ ⟲ ]| | [Example Staging: Grade 4 — Proliferative DR]   | |
+| Opacity: [----●----------] [Ex: 70%]  [ 🔍 ] [ ⟲ ]| | [Illustrative Schema: Grade 4 — PDR]            | |
 | View: [ (•) Dual-Pane  ( ) Single Canvas ]        | | [ 0: None | 1: Mild | 2: Mod | 3: Sev | 4: PDR ]| |
 |                                                   | | Active Segment: [ 4: PDR (Crimson Red) ]        | |
 | +-----------------------------------------------+ | +-------------------------------------------------+ |
 | |                                               | |                                                     |
 | |             RETINAL FUNDUS CANVAS             | | 2. Calibrated Confidence & Epistemic Uncertainty  |
 | |                                               | | +-------------------------------------------------+ |
-| |         Synchronized Pan & Zoom Viewport      | | | Calibrated Probability: [Example: e.g. 91.4%]   | |
-| |         Interactive Saliency Overlay          | | | Epistemic Uncertainty:  [Example: e.g. 0.08]    | |
-| |         Anatomical Landmark Preservation      | | | Uncertainty Status:     [Low / Confident]       | |
+| |         Synchronized Pan & Zoom Viewport      | | | Calibrated Probability: [Illustrative: e.g.91%]| |
+| |         Interactive Saliency Overlay          | | | Epistemic Uncertainty:  [Illustrative: e.g.0.08]|
+| |         Anatomical Landmark Preservation      | | | Uncertainty Status:     [Acceptable Range]      | |
 | |                                               | | | (Provisional Alert Threshold: > 0.35)           | |
 | |                                               | | +-------------------------------------------------+ |
 | +-----------------------------------------------+ |                                                     |
 | [Notice: Grad-CAM reflects activation density   | | 3. Retinal Lesion Quantification (U-Net)           |
 | and does not establish anatomical causality]    | | +-------------------------------------------------+ |
-| (Shortcut: Hold Spacebar to reveal raw fundus)    | | [X] Neovascularization: [Example: e.g. 140 px]  | |
-|                                                   | | [X] Blot Hemorrhages:   [Example: e.g. 780 px]  | |
-|                                                   | | [X] Hard Exudates:      [Example: e.g. 420 px]  | |
+| (Shortcut: Hold Spacebar to reveal raw fundus)    | | [X] Neovascularization: [Illustrative: e.g. 140px]|
+|                                                   | | [X] Blot Hemorrhages:   [Illustrative: e.g. 780px]|
+|                                                   | | [X] Hard Exudates:      [Illustrative: e.g. 420px]|
 |                                                   | +-------------------------------------------------+ |
 |                                                   |                                                     |
 |                                                   | 4. Technical Quality Assessment                     |
-|                                                   | Quality Score: [Example: e.g. 0.94] (Gradable: YES) |
+|                                                   | Quality Score: [Illustrative: 0.94] (Gradable: YES) |
 |                                                   | Sharpness: [Ex: 0.92] | Illumination: [Ex: 0.95]    |
 +---------------------------------------------------+-----------------------------------------------------+
 ```
@@ -203,7 +205,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 - **Primary Users**: Reviewing Ophthalmologists, Primary Care Physicians, Patients.
 
 ### 5.2 Layout Wireframe
-*(Note: Example schema values labeled).*
+*(Note: Schema placeholders labeled).*
 
 ```
 +---------------------------------------------------------------------------------------------------------+
@@ -213,7 +215,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 |                                                                                                         |
 |  =====================================================================================================  |
 |  EYERIS RETINAL SCREENING REPORT                                             Clinic: Rural Health Camp 4|
-|  SIH Problem Statement PS26038                                               Exam Date: 16-Nov-2026     |
+|  SIH Problem Statement PS26038                                               Exam Date: [Illustrative]  |
 |  =====================================================================================================  |
 |                                                                                                         |
 |  PATIENT & EXAMINATION IDENTIFIERS:                                                                     |
@@ -221,14 +223,14 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 |                                                                                                         |
 |  CLINICAL FINDINGS & REFERRAL RECOMMENDATION:                                                           |
 |  -----------------------------------------------------------------------------------------------------  |
-|  - Predicted Severity Staging: [Example: GRADE 4 — PROLIFERATIVE DIABETIC RETINOPATHY (PDR)]           |
-|  - Calibrated Confidence:      [Example: e.g. 91.4%]                                                    |
-|  - Clinical Referral Status:   REFERRAL RECOMMENDED                                                     |
-|  - Escalation Urgency:         URGENT SPECIALIST REFERRAL (Within 1–2 Weeks)                            |
-|  - Recommended Next Action:    Dilated retinal examination and consideration for retinal therapy.       |
+|  - Predicted Severity Staging: [Illustrative Example: Grade 4 — Proliferative Diabetic Retinopathy]     |
+|  - Calibrated Confidence:      [Illustrative Example: e.g. 91.4%]                                       |
+|  - Clinical Referral Status:   [Backend Decision Policy Output]                                         |
+|  - Escalation Urgency:         [Backend Policy Urgency Tier]                                            |
+|  - Recommended Next Action:    [Backend Clinical Guidance Statement]                                    |
 |                                                                                                         |
 |  IMAGE QUALITY ASSESSMENT:                                                                              |
-|  - Technical Quality: PASS ([Example: 0.94 / 1.00]) | Sharpness: [Ex: 0.92] | Illumination: [Ex: 0.95]  |
+|  - Technical Quality: PASS ([Illustrative: 0.94 / 1.00]) | Sharpness: [Ex: 0.92] | Illum: [Ex: 0.95]    |
 |                                                                                                         |
 |  RETINAL IMAGERY:                                                                                       |
 |  +-------------------------------------+  +-------------------------------------+                       |
@@ -263,7 +265,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 | +-------------------------------+ +-------------------------------+ +---------------------------------+ |
 | | FastAPI REST Gateway          | | PostgreSQL Metadata DB        | | Local Image Storage             | |
 | | 🟢 Status: Operational (200)   | | 🟢 Status: Connected (pool:5) | | 🟢 Status: Writable             | |
-| | Version: 0.1.0                | | Latency: [Ex: 2.1 ms]         | | Free Space: [Ex: 142 GB]        | |
+| | Version: 0.1.0                | | Latency: [Illustrative:2.1 ms]| | Free Space: [Illustrative:142GB]| |
 | +-------------------------------+ +-------------------------------+ +---------------------------------+ |
 |                                                                                                         |
 | AI Model Subsystem Pipeline Status (Members 1, 2, 3 Integration)                                        |

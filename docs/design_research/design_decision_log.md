@@ -1,13 +1,13 @@
-# EYERIS — UI/UX Design Decision Log & Architectural Traceability (Revision 1)
+# EYERIS — UI/UX Design Decision Log & Architectural Traceability (Revision 2)
 **Subsystem**: UI/UX Governance & Decision Architecture  
-**Role**: Senior Product Designer & Lead Integration Architect (Member 4)  
+**Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
+**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
 
 ---
 
-## 1. Member 4 Approved Design Decisions
+## 1. Member 4 Approved Design Decisions (Revision 2 Final)
 
 The following twelve design governance decisions have been formally approved and logged as binding architectural requirements:
 
@@ -19,14 +19,14 @@ The following twelve design governance decisions have been formally approved and
 +---------+---------------------------------------------------------------------+-------------------------+
 | DEC-01  | Diagnostic Slate Dark Palette (#090D16 Canvas / #131C2E Cards)       | Visual & Ergonomics     |
 | DEC-02  | Instantaneous In-Chair Pre-Inference Quality Gating                 | Clinical Safety & Intake|
-| DEC-03  | Decoupled Pipeline States (Offline, Quality, Uncertainty, Referral) | Backend & State Machine |
+| DEC-03  | Decoupled States with Strict 4-Tier Precedence Hierarchy            | Backend & State Machine |
 | DEC-04  | Interactive Opacity Slider & Hold Spacebar Raw Fundus Bypass        | Retinal Viewport Tool   |
 | DEC-05  | Mandatory Attention Map Causality Guardrail Notice                  | Explainability Policy   |
-| DEC-06  | Strict Absence of Fabricated or Simulated Clinical Metrics           | Data Integrity & Ethics |
+| DEC-06  | Strict Absence of Fabricated Metrics & Labeled Illustrative Data    | Data Integrity & Ethics |
 | DEC-07  | Configurable Provisional Engineering Values (0.60 Quality, 0.35 Unc)| Telemetry Architecture  |
 | DEC-08  | Role-Aware Presentation Views on Unified Decision Pipeline Engine    | Multi-User UX           |
 | DEC-09  | Multi-Channel Encoding (Zero Color-Alone Status Representation)     | WCAG 1.4.1 Accessibility|
-| DEC-10  | Mathematically Verified WCAG 2.2 AA Contrast Compliance             | WCAG 1.4.3 Contrast     |
+| DEC-10  | Mathematically Verified Contrast (Corrected Ratios & #2563EB Button)| WCAG 1.4.3 & 1.4.11     |
 | DEC-11  | Pure CSS @media print Medical Summary Report Engine                 | Reporting Subsystem     |
 | DEC-12  | Regulatory & Clinical Transparency Framing                          | Legal & Ethics          |
 +---------+---------------------------------------------------------------------+-------------------------+
@@ -54,15 +54,15 @@ The following twelve design governance decisions have been formally approved and
 
 ---
 
-### DEC-03: Decoupled Architectural States
+### DEC-03: Decoupled Architectural States with Strict 4-Tier Precedence Hierarchy
 - **Reference Source**: NHS Diabetic Eye Screening Programme (DESP) Clinical Pathways, Eyeris Clinical Decision Engine.
 - **Observed Pattern**: Research prototypes frequently conflate "offline model" or "image quality failure" with a clinical referral, artificially flooding tertiary hospital referral queues.
-- **EYERIS Adaptation**: Formally separates four distinct system states:
-  - *State A: Model Offline*: `referral_recommended: False`, `review_required: True`, `urgency: "manual_review"`.
-  - *State B: Quality Failure*: `is_gradable: False`, `urgency: "recapture_required"`, automated grading halted.
-  - *State C: High Uncertainty*: `uncertainty_detected: True`, `urgency: "urgent_review"`, specialist arbitration required.
-  - *State D: Clinical Referral*: `referral_recommended: True`, tiered by ICDR disease severity (routine, prompt, urgent).
-- **Reason for Adaptation**: Protects hospital referral registries from false-positive saturation while guaranteeing every unassessed case is routed to human clinician review.
+- **EYERIS Adaptation**: Formally establishes a 4-tier precedence hierarchy:
+  1. *State B (Precedence 1 - Highest): Image Quality Failure*: `is_gradable: False`, `urgency: "recapture_required"`. Halts grading; if recapture unavailable, routes to manual review; referral is invalid/false; never overridden by model confidence.
+  2. *State A (Precedence 2): Model Unavailable*: Classification withheld; clinical review required; `referral_recommended: False`; no negative result inferred.
+  3. *State C (Precedence 3): High Model Uncertainty*: Uncertainty exceeds threshold (`0.35`); classification withheld or flagged uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`.
+  4. *State D (Precedence 4 - Lowest): Referral Indicated*: Referral recommendation, urgency tier, and human review requirements are supplied directly by backend policy. Frontend does not hardcode universal urgency mappings or invent clinical timeframes.
+- **Reason for Adaptation**: Protects hospital referral registries from false-positive saturation while guaranteeing every unassessed or uncertain case is routed to human clinician review.
 - **Priority**: Critical.
 
 ---
@@ -87,13 +87,13 @@ The following twelve design governance decisions have been formally approved and
 
 ---
 
-### DEC-06: Strict Absence of Fabricated or Simulated Diagnostics
+### DEC-06: Strict Absence of Fabricated Metrics & Labeled Illustrative Data
 - **Reference Source**: FDA Good Machine Learning Practice (GMLP) for Medical Device Development.
-- **Observed Pattern**: Early prototypes sometimes inject randomized mock predictions or synthetic metrics to make demos appear complete, risking severe clinical misinterpretation.
+- **Observed Pattern**: Early prototypes sometimes inject unannotated mock predictions or synthetic metrics to make demos appear complete, risking clinical confusion.
 - **EYERIS Adaptation**:
   - `allow_mock=False` is enforced by default in `model_orchestrator.py`.
   - If real weights are unharvested, the UI displays `"Model Offline — Clinical Review Required"`.
-  - All wireframe numbers are explicitly labeled as `[Example Wireframe Value: e.g. N]`.
+  - All wireframe numbers and clinical statements are explicitly labeled as `[Illustrative Example: e.g. N]`.
 - **Reason for Adaptation**: Preserves clinical integrity and ethical credibility before medical evaluators.
 - **Priority**: Critical.
 
@@ -125,18 +125,21 @@ The following twelve design governance decisions have been formally approved and
 - **Observed Pattern**: Medical dashboards frequently rely on red/amber/green badges without accompanying text or icon indicators, failing color-blind clinicians.
 - **EYERIS Adaptation**: Every clinical status and severity grade combines:
   1. An icon glyph (`[●]`, `[■]`, `[◆]`, `[▲]`, `[⯄]`).
-  2. An explicit text label (e.g. `"Grade 4: Proliferative DR"`).
+  2. An explicit text label (e.g. `"Grade 4: PDR"`).
   3. A numeric severity level.
 - **Reason for Adaptation**: Complete accessibility for color-blind practitioners and unambiguous visual parsing.
 - **Priority**: Critical.
 
 ---
 
-### DEC-10: Mathematically Verified WCAG 2.2 AA Contrast Compliance
-- **Reference Source**: WCAG 2.2 Contrast Standards (Level AA).
-- **Observed Pattern**: Claiming accessibility compliance without calculating exact mathematical contrast ratios.
-- **EYERIS Adaptation**: Computed exact relative luminance and contrast ratios across all foreground/background pairings. Calibrated muted text `--eyeris-text-muted: #8493A8` to guarantee **5.45:1** contrast on card surfaces (exceeding 4.5:1 AA requirement). Primary headings achieve **16.28:1** (exceeding AAA requirement).
-- **Reason for Adaptation**: Rigorous, verified accessibility compliance.
+### DEC-10: Mathematically Verified Contrast (Corrected Ratios & #2563EB Standard)
+- **Reference Source**: WCAG 2.2 Relative Luminance Standards (1.4.3 & 1.4.11).
+- **Observed Pattern**: Claiming compliance without verifying exact relative luminance, leading to reporting errors and white-on-blue text contrast failures.
+- **EYERIS Adaptation**:
+  - Verified exact mathematical contrast ratios for all colors.
+  - Corrected reported discrepancies: `#3B82F6` focus indicator achieves **4.63:1** against surface (passes WCAG 1.4.11 $\ge 3.0:1$); `#67E8F9` achieves **11.75:1**; `#FEF08A` achieves **14.63:1**.
+  - Identified that `#3B82F6` with white text yields **3.68:1** (failing normal text AA 4.5:1). Standardized primary button backgrounds on `#2563EB` (luminance 0.1537), achieving **5.17:1** with white text (`#FFFFFF`) and **3.29:1** against dark surface (passing both WCAG 1.4.3 and 1.4.11).
+- **Reason for Adaptation**: Absolute mathematical accessibility compliance without false claims.
 - **Priority**: Critical.
 
 ---

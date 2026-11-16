@@ -1,82 +1,96 @@
-# EYERIS — Final Visual Design System & Token Specification (Revision 1)
+# EYERIS — Final Visual Design System & Token Specification (Revision 2)
 **Subsystem**: UI/UX Design System  
-**Role**: Senior Product Designer & Design Systems Engineer (Member 4)  
+**Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
+**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
 
 ---
 
-## 1. Member 4 Approved Design Decisions
+## 1. Member 4 Approved Design Decisions (Revision 2 Final)
 
-This revised design system integrates the following twelve approved architectural decisions:
-1. Standardizes on the Diagnostic Slate Dark Palette (`#090D16` canvas, `#131C2E` primary card surface).
-2. Preserves Inter typography with tabular numerals (`tnum`) for data stability.
-3. Incorporates exact mathematically verified WCAG 2.2 AA contrast ratios for all foreground/background pairings.
-4. Enforces multi-channel accessibility: clinical severity and system statuses are never conveyed through color alone; every indicator combines an icon, a text label, and a numeric stage.
-5. Elevates the dual-pane retinal analysis workspace as the primary visual and technical showcase.
-6. Calibrates lesion overlays (hard exudates, hemorrhages, microaneurysms) for maximum clarity without obscuring retinal tissue.
-7. Guarantees raw anatomical fundus visibility through continuous opacity adjustment ($0–100\%$) and a spacebar bypass.
-8. Enforces role-aware presentation modes (Operator View vs. Specialist View) that consume the identical backend contract without modifying the decision engine.
-9. Separates pipeline states into four distinct UI representations: Model Unavailability, Image Quality Failure, Model Uncertainty, and Clinical Referral.
-10. Treats quality (0.60) and uncertainty (0.35) thresholds as configurable provisional engineering values, not clinically certified thresholds.
-11. Labels all wireframe metrics as `[Example Wireframe Value: e.g. N]`.
-12. Explicitly disclaims regulatory clearance or automated diagnostic claims.
-
----
-
-## 2. Mathematically Verified Color Token Architecture
-
-All contrast ratios were computed using the standard WCAG relative luminance formula:
-$$\text{Contrast Ratio} = \frac{L_1 + 0.05}{L_2 + 0.05}$$
-where $L_1$ is the relative luminance of the lighter color and $L_2$ is the relative luminance of the darker color. Target: WCAG 2.2 Level AA ($\ge 4.5:1$ for body text, $\ge 3.0:1$ for large text and UI components).
-
-### 2.1 Surface & Typographic Tokens with Exact Contrast Ratios
-
-| Token Name | HEX Value | Surface Role | Exact Contrast vs Canvas (`#090D16`) | Exact Contrast vs Surface-1 (`#131C2E`) | WCAG 2.2 AA Compliance |
-| :--- | :---: | :--- | :---: | :---: | :---: |
-| `--eyeris-canvas` | `#090D16` | Deepest root canvas | Base (1.00:1) | — | Base Background |
-| `--eyeris-surface-subtle` | `#0F1624` | Inset wells, table headers | 1.15:1 | — | Low-contrast boundary |
-| `--eyeris-surface-1` | `#131C2E` | Primary elevated card panels | 1.25:1 | Base (1.00:1) | Primary Container |
-| `--eyeris-surface-2` | `#1B263B` | Interactive hover states | 1.62:1 | 1.30:1 | Component Surface |
-| `--eyeris-surface-3` | `#25334E` | Active highlights, tooltips | 2.15:1 | 1.72:1 | Elevated Overlay |
-| `--eyeris-border-subtle` | `#1E2C44` | Structural card borders | 1.39:1 | 1.22:1 | Divider |
-| `--eyeris-border-focus` | `#3B82F6` | Keyboard focus ring | 4.88:1 | 4.28:1 | **Passes AA Component (3.0:1)** |
-| **`--eyeris-text-primary`** | `#F8FAFC` | Display & primary headers | **18.57:1** | **16.28:1** | **Passes AAA ($\ge 7.0:1$)** |
-| **`--eyeris-text-secondary`**| `#94A3B8` | Field labels, captions | **7.58:1** | **6.64:1** | **Passes AA ($\ge 4.5:1$)** |
-| **`--eyeris-text-muted`** | `#8493A8` | Calibrated footnotes, units | **6.22:1** | **5.45:1** | **Passes AA ($\ge 4.5:1$)** |
+This revised design system incorporates the following twelve audited decisions:
+1. Standardizes on the Diagnostic Slate Dark Palette (`#090D16` root canvas, `#131C2E` elevated card surface).
+2. Preserves Inter typography with tabular numerals (`tnum`) for layout stability across numeric telemetry.
+3. Incorporates exact, mathematically verified contrast ratios derived from the official WCAG relative-luminance formula.
+4. Corrects previously misstated contrast values for `#3B82F6` (4.63:1 non-text focus indicator against surface), `#67E8F9` (11.75:1), and `#FEF08A` (14.63:1).
+5. Standardizes primary button backgrounds on `#2563EB` (luminance 0.1537) to guarantee **5.17:1** contrast with white text (`#FFFFFF`), resolving the 3.68:1 text failure of `#3B82F6`.
+6. Enforces multi-channel accessibility: clinical severity and system statuses are never conveyed through color alone; every indicator combines an icon shape, a text label, and a numeric stage.
+7. Elevates the dual-pane retinal analysis workspace as the primary visual and technical showcase.
+8. Guarantees raw anatomical fundus visibility through continuous opacity adjustment ($0–100\%$) and a spacebar bypass.
+9. Enforces role-aware presentation modes (Operator View vs. Specialist View) that consume the identical backend contract without modifying the decision engine.
+10. Separates pipeline states into four distinct UI representations with strict precedence: Quality Failure (Priority 1), Model Unavailable (Priority 2), Model Uncertainty (Priority 3), and Referral Decision (Priority 4).
+11. Treats quality (0.60) and uncertainty (0.35) thresholds as configurable provisional engineering values, not certified clinical standards.
+12. Labels all wireframe metrics as illustrative examples and explicitly disclaims regulatory clearance.
 
 ---
 
-### 2.2 Clinical Severity & Status Tokens (Multi-Channel Encoding)
-*Every clinical status token is paired with an icon shape, text label, and numeric severity indicator. The text tints below are specifically calibrated to yield high-contrast legibility against dark badge containers.*
+## 2. Reproducible Mathematical WCAG 2.2 Contrast Verification
 
-| Clinical Severity / Status | Base Token HEX | Badge Text Tint | Exact Text Contrast vs Surface-1 (`#131C2E`) | Multi-Channel Encoding (WCAG 1.4.1) | Clinical Action |
-| :--- | :---: | :---: | :---: | :--- | :--- |
-| **Grade 0 (No DR)** | `#10B981` | `#6EE7B7` | **11.17:1** (Passes AAA) | Circle Icon `[●]` + Text `"Grade 0: No DR"` | Routine Annual Screening |
-| **Grade 1 (Mild NPDR)** | `#06B6D4` | `#67E8F9` | **12.45:1** (Passes AAA) | Square Icon `[■]` + Text `"Grade 1: Mild NPDR"` | Routine Monitoring (6–12 Mo) |
-| **Grade 2 (Moderate NPDR)**| `#F59E0B` | `#FCD34D` | **11.81:1** (Passes AAA) | Diamond Icon `[◆]` + Text `"Grade 2: Moderate NPDR"`| Routine Referral (4–8 Wks) |
-| **Grade 3 (Severe NPDR)** | `#F97316` | `#FDBA74` | **10.10:1** (Passes AAA) | Triangle Icon `[▲]` + Text `"Grade 3: Severe NPDR"`| Prompt Referral (2–4 Wks) |
-| **Grade 4 (Proliferative)**| `#EF4444` | `#FCA5A5` | **8.97:1** (Passes AAA) | Octagon Icon `[⯄]` + Text `"Grade 4: PDR"` | Urgent Specialist Referral (1–2 Wks) |
-| **Model Uncertainty Alert**| `#8B5CF6` | `#C4B5FD` | **9.22:1** (Passes AAA) | Shield Icon `[🛡]` + Text `"High Uncertainty"` | Specialist Confirmation Required |
-| **Image Quality Rejection**| `#DC2626` | `#FECACA` | **11.77:1** (Passes AAA) | Alert Icon `[⚠]` + Text `"Recapture Required"`| Immediate In-Chair Retake |
-| **Model Offline State** | `#EAB308` | `#FEF08A` | **13.52:1** (Passes AAA) | Pause Icon `[⏸]` + Text `"Manual Review"` | Clinician Manual Grading Queue |
+### 2.1 WCAG Relative Luminance Formula
+For each sRGB color component $C \in \{R, G, B\}$ normalized to $[0, 1]$:
+$$C_{\text{linear}} = \begin{cases} \frac{C}{12.92} & \text{if } C \le 0.04045 \\ \left(\frac{C + 0.055}{1.055}\right)^{2.4} & \text{if } C > 0.04045 \end{cases}$$
+$$\text{Relative Luminance } L = 0.2126 \cdot R_{\text{linear}} + 0.7152 \cdot G_{\text{linear}} + 0.0722 \cdot B_{\text{linear}}$$
+$$\text{Contrast Ratio } CR = \frac{L_{\text{lighter}} + 0.05}{L_{\text{darker}} + 0.05}$$
+
+- **Canvas Background (`#090D16`)**: $L = 0.0063$
+- **Surface-1 Background (`#131C2E`)**: $L = 0.0117$
 
 ---
 
-### 2.3 Retinal Lesion Overlay Tokens
-- **Hard Exudates**: `--eyeris-lesion-exudate: #FACC15` (Vivid Yellow fill with 1px border).
-- **Hemorrhages / Microaneurysms**: `--eyeris-lesion-hemorrhage: #EF4444` (Crimson Red fill).
-- **Microaneurysm Markers**: `--eyeris-lesion-ma: #06B6D4` (Electric Cyan circular points).
-- **Cotton Wool Spots**: `--eyeris-lesion-cws: #E2E8F0` (Semi-translucent Chalk White contour).
+### 2.2 Complete Contrast Verification Table
+
+| Color Role | HEX Code | Rel. Lum ($L$) | Exact CR vs Surface (`#131C2E`) | Exact CR vs Canvas (`#090D16`) | Applicable WCAG Standard | Compliance Status |
+| :--- | :---: | :---: | :---: | :---: | :--- | :--- |
+| **`--eyeris-text-primary`** | `#F8FAFC` | 0.9536 | **16.28:1** | **18.57:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **`--eyeris-text-secondary`**| `#94A3B8` | 0.3595 | **6.64:1** | **7.58:1** | WCAG 1.4.3 Text (Normal) | **Passes AA** ($\ge 4.5:1$) |
+| **`--eyeris-text-muted`** | `#8493A8` | 0.2860 | **5.45:1** | **6.22:1** | WCAG 1.4.3 Text (Normal) | **Passes AA** ($\ge 4.5:1$) |
+| **`--eyeris-primary-btn`** | `#2563EB` | 0.1537 | **3.29:1** | **3.73:1** | WCAG 1.4.11 Component | **Passes AA Component** ($\ge 3.0:1$)|
+| *Btn Text on #2563EB* | `#FFFFFF` | 1.0000 | **5.17:1** (vs #2563EB) | — | WCAG 1.4.3 Text (Normal) | **Passes AA** ($\ge 4.5:1$) |
+| **`--eyeris-border-focus`** | `#3B82F6` | 0.2355 | **4.63:1** | **5.28:1** | WCAG 1.4.11 Focus Indicator | **Passes AA Component** ($\ge 3.0:1$)|
+| **`--eyeris-border-strong`**| `#2E4366` | 0.0555 | **1.71:1** | **1.95:1** | Structural Boundary | Decorative Inset |
+| **`--eyeris-border-subtle`**| `#1E2C44` | 0.0249 | **1.22:1** | **1.39:1** | Structural Boundary | Decorative Divider |
+| **Grade 0 Badge Text** | `#6EE7B7` | 0.6389 | **11.17:1** | **12.75:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Grade 1 Badge Text** | `#67E8F9` | 0.6744 | **11.75:1** | **13.40:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Grade 2 Badge Text** | `#FCD34D` | 0.6782 | **11.81:1** | **13.48:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Grade 3 Badge Text** | `#FDBA74` | 0.5726 | **10.10:1** | **11.52:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Grade 4 Badge Text** | `#FCA5A5` | 0.5032 | **8.97:1** | **10.24:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Uncertainty Alert Text**| `#C4B5FD` | 0.5188 | **9.22:1** | **10.52:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Recapture Alert Text** | `#FECACA` | 0.6758 | **11.77:1** | **13.43:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+| **Model Offline Text** | `#FEF08A` | 0.8523 | **14.63:1** | **16.70:1** | WCAG 1.4.3 Text (Normal) | **Passes AAA** ($\ge 7.0:1$) |
+
+*Distinction Note*: Text contrast (WCAG 1.4.3) requires $\ge 4.5:1$ for normal body text and $\ge 3.0:1$ for large text ($>18$pt or $>14$pt bold). Non-text component contrast (WCAG 1.4.11) requires $\ge 3.0:1$ for visual boundaries of active user interface components and focus indicators.
 
 ---
 
-## 3. Typography System & Numerical Precision
+## 3. Multi-Channel Status Encoding (WCAG 1.4.1)
+
+Color is never the sole communicator of clinical urgency or system health:
+
+```
++---------------------------------------------------------------------------------------------------------+
+|                                    MULTI-CHANNEL CLINICAL STATUS ENCODING                               |
++--------------------------+-------------+---------------+-----------------------+------------------------+
+| Status State             | Icon Shape  | Color Code    | Explicit Text Label   | Numeric / System Code  |
++--------------------------+-------------+---------------+-----------------------+------------------------+
+| Grade 0 (No DR)          | Circle  [●] | Green #10B981 | "Grade 0: No DR"      | ICDR Stage 0           |
+| Grade 1 (Mild NPDR)      | Square  [■] | Cyan  #06B6D4 | "Grade 1: Mild NPDR"  | ICDR Stage 1           |
+| Grade 2 (Moderate NPDR)  | Diamond [◆] | Amber #F59E0B | "Grade 2: Mod NPDR"   | ICDR Stage 2           |
+| Grade 3 (Severe NPDR)    | Triangle[▲] | Orange#F97316 | "Grade 3: Severe NPDR"| ICDR Stage 3           |
+| Grade 4 (Proliferative)  | Octagon [⯄] | Red   #EF4444 | "Grade 4: PDR"        | ICDR Stage 4           |
+| Model Uncertainty Gate   | Shield  [🛡] | Violet#8B5CF6 | "High Uncertainty"    | Status: Not determined |
+| Image Quality Rejection  | Warning [⚠] | Red   #DC2626 | "Recapture Required"  | Quality Score < 0.60   |
+| Model Unavailable State  | Pause   [⏸] | Yellow#EAB308 | "Manual Review"       | Status: pending_review |
++--------------------------+-------------+---------------+-----------------------+------------------------+
+```
+
+---
+
+## 4. Typography System & Numerical Precision
 
 - **Font Family**: `Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
-- **Tabular Numerals**: `font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;` strictly applied to all telemetry values, Case IDs, quality scores, coordinates, and probabilities.
-- **Type Scale**:
+- **Tabular Numerals**: `font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;` strictly enforced on all telemetry, coordinates, and case identifiers.
+- **Scale**:
   - `Display / H1`: 28px (1.75rem), Bold (700), Line-height 1.2
   - `Section / H2`: 20px (1.25rem), Semibold (600), Line-height 1.3
   - `Card Header / H3`: 16px (1.00rem), Semibold (600), Line-height 1.4
@@ -87,7 +101,7 @@ where $L_1$ is the relative luminance of the lighter color and $L_2$ is the rela
 
 ---
 
-## 4. Master Layout Dimensions & Responsive Grid
+## 5. Master Layout Dimensions & Responsive Grid
 
 ```
 +---------------------------------------------------------------------------------------------------------+
@@ -108,26 +122,3 @@ where $L_1$ is the relative luminance of the lighter color and $L_2$ is the rela
 | [Settings]           |                                                                                  |
 +----------------------+----------------------------------------------------------------------------------+
 ```
-
-### Breakpoints:
-- **Desktop Large ($\ge 1440$px)**: Full sidebar (240px), 2-column workspace (60% viewer / 40% triage).
-- **Desktop Standard ($1200$px – $1439$px)**: Collapsed icon sidebar (64px), 2-column workspace.
-- **Tablet ($768$px – $1199$px)**: Off-canvas drawer navigation, single-column tabbed layout.
-- **Mobile / Outreach Tablet ($< 768$px)**: Bottom navigation rail, vertical stacked flow.
-
----
-
-## 5. Accessibility Compliance Architecture (WCAG 2.2 AA)
-
-1. **Color Independence (WCAG 1.4.1)**: All status badges combine distinct icon glyphs (`[●]`, `[■]`, `[◆]`, `[▲]`, `[⯄]`), numeric values, and text labels.
-2. **Contrast Verification (WCAG 1.4.3 & 1.4.11)**:
-   - Primary text against surface: **16.28:1** (Exceeds AAA 7.0:1 requirement).
-   - Secondary text against surface: **6.64:1** (Exceeds AA 4.5:1 requirement).
-   - Calibrated muted text against surface: **5.45:1** (Exceeds AA 4.5:1 requirement).
-   - Status badge text against badge containers: **8.97:1 to 13.52:1** (Exceeds AAA 7.0:1).
-3. **Keyboard Viewport Controls (WCAG 2.1.1)**:
-   - `H`: Toggle Grad-CAM attention heatmap overlay on/off.
-   - `Space` (Hold): Temporarily set heatmap opacity to 0% to reveal the raw fundus image.
-   - `+` / `-`: Incremental zoom in / zoom out.
-   - `0`: Reset viewport pan and zoom to fit.
-   - `Esc`: Close open modal dialogs.

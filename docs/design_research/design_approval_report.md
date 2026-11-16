@@ -1,32 +1,32 @@
-# EYERIS — UI/UX Design Research Approval Report & Strategic Blueprint (Revision 1)
-**Role**: Senior Product Designer, Healthcare UX Architect & Design Systems Lead (Member 4)  
+# EYERIS — UI/UX Design Research Approval Report & Strategic Blueprint (Revision 2)
+**Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System (SIH Problem Statement PS26038)  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
+**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
 **Target Branch**: `om`  
 
 ---
 
-## 1. Member 4 Approved Design Decisions
+## 1. Member 4 Approved Design Decisions (Revision 2 Final)
 
-The following foundational decisions have been formally approved and incorporated into this revision:
+The following foundational architectural decisions have been formally approved and verified:
 
 1. **Hybrid Product Identity**: Preserved the strategic synthesis of Clinical PACS reading room ergonomics, Premium SaaS high-density productivity, and Medical AI explainability.
 2. **Visual Ergonomics**: Standardized on the Diagnostic Slate Dark Palette (`#090D16`), Inter typography with tabular numerals (`tnum`), and a collapsible 240px sidebar.
 3. **Primary Showcase**: Elevated the **Retinal Image Analysis Workspace (Screening Details)** as the primary technical and clinical centerpiece of the application.
-4. **Data Integrity & Labeling**: Removed all illustrative numerical metrics that could be mistaken for actual clinical patient outcomes; all wireframe metrics are explicitly labeled as `[Example Wireframe Value: e.g. N]`.
-5. **Provisional Engineering Thresholds**: Quality threshold `0.60` and uncertainty threshold `0.35` are documented strictly as configurable, provisional engineering heuristics. They are **not** clinically validated operating points.
+4. **Strictly Labeled Illustrative Content**: Removed all unannotated numerical metrics. Every wireframe case, score, percentage, lesion count, date, and patient ID is explicitly labeled as `[Illustrative Example: e.g. N]` or neutral schema placeholders.
+5. **Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are documented strictly as configurable, provisional engineering heuristics. They are **not** clinically validated operating points.
 6. **Causality Disclaimer**: Grad-CAM heatmaps are strictly defined as visual correlations of deep feature activation density. The UI explicitly forbids implying that Grad-CAM establishes anatomical lesion causality.
-7. **Distinct Operational States**: Enforced strict architectural separation between:
-   - *State A: Model Unavailability* (`status: "pending_review"`, manual clinical review required).
-   - *State B: Image Quality Failure* (`is_gradable: false`, recapture required, classification halted).
-   - *State C: High Model Uncertainty* (`uncertainty_detected: true`, specialist arbitration required).
-   - *State D: Clinical Referral* (ICDR stage-based clinical escalation).
-8. **Empirical WCAG 2.2 AA Contrast**: Verified all color contrast ratios using exact mathematical luminance calculations against dark surfaces.
-9. **Multi-Channel Status Communication**: Enforced that color is never the sole communicator of clinical urgency or system health (pairing color with text labels, numeric grades, and distinct icon geometry).
+7. **Rigorous Clinical State Precedence**: Enforced an unambiguous 4-tier state precedence hierarchy:
+   - *Precedence 1: State B — Image Quality Failure* (Grading halted; recapture required; if recapture unavailable, manual clinical review required; never produces a reassuring grade or a referral).
+   - *Precedence 2: State A — Model Unavailable* (Classification withheld; clinical review required; no inferred negative result; no automated referral).
+   - *Precedence 3: State C — High Uncertainty* (Classification withheld or marked uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`).
+   - *Precedence 4: State D — Referral Indicated* (Referral indication and urgency are dictated directly by backend decision policy; no hardcoded universal urgency mapping or invented clinical timeframes in the frontend).
+8. **Mathematical WCAG 2.2 AA Contrast Compliance**: Verified all color pairings using exact relative luminance calculations. Corrected previously reported contrast values for `#3B82F6` (4.63:1 non-text focus indicator against surface), `#67E8F9` (11.75:1), and `#FEF08A` (14.63:1). Standardized on `#2563EB` (5.17:1 with white text) for primary buttons.
+9. **Multi-Channel Accessibility**: Color is never the sole communicator of clinical urgency or system health (pairing color with text labels, numeric grades, and distinct icon geometry).
 10. **Anatomical Visibility Guarantee**: Guaranteed that raw, preprocessed fundus images remain instantly accessible at all times via opacity sliders ($0–100\%$), dual-pane comparative viewports, and press-and-hold spacebar inspection.
 11. **Unified Decision Engine with Role-Aware Presentation**: Operator Mode and Specialist Mode are strictly role-aware front-end presentation views consuming the exact same backend API payload, not separate decision engines.
-12. **Regulatory & Clinical Transparency**: Removed all unsupported claims regarding regulatory clearance or commercial certification. Formally framed EYERIS as an investigational research prototype for SIH PS26038.
+12. **Regulatory & Clinical Transparency**: Formally disclaimed regulatory clearance or autonomous diagnostic authority. Framed EYERIS strictly as an investigational research prototype for SIH Problem Statement PS26038.
 
 ---
 
@@ -41,7 +41,7 @@ The following foundational decisions have been formally approved and incorporate
 
 ### 2.2 Premium High-Precision SaaS Platforms
 - **Linear**: High-density keyboard navigation (`H` to toggle heatmap, `Space` to inspect raw fundus), collapsible navigation rails, and crisp typography.
-- **Vercel**: Clear system telemetry, clean monospace identifiers (`EYE-20261116-A1B2`), and robust pipeline status indicators.
+- **Vercel**: Clear system telemetry, clean monospace identifiers (`EYE-XXXX`), and robust pipeline status indicators.
 - **Stripe Dashboard**: Clean data table sorting, defensive error states, and clear feedback loops without misleading decorative charts.
 
 ---
@@ -76,28 +76,40 @@ graph TD
     Sidebar --> Set[7. Settings: Clinic & Camera Device Configuration]
 ```
 
-### Section Breakdown:
-1. **Dashboard**: High-level screening throughput, pending manual review queue, recent triage cases. All metrics derived strictly from actual database records.
-2. **New Screening**: Rapid fundus image intake, bilateral eye selection (OD/OS), client-side file validation, and instant quality feedback.
-3. **Screening History**: Filterable, searchable audit registry supporting sorting by urgency, quality, and examination date.
-4. **Screening Details (Primary Technical Showcase)**: Deep retinal inspection workspace featuring dual-pane synchronized canvases, Grad-CAM opacity sliders, lesion segmentation masks, and calibrated uncertainty metrics.
-5. **Reports**: Web-native medical screening summary with pure CSS `@media print` paper rendering and physical clinician signature block.
-6. **System & Model Status**: Real-time diagnostic telemetry probing FastAPI `/api/v1/health`, database connectivity, and ML model availability (Members 1, 2, and 3).
-7. **Settings**: Configuration of local clinic identifier, default fundus camera model, and display preferences.
-
 ---
 
-## 5. Design Comparison Matrix & Final Recommendation
+## 5. Clinical State Precedence Architecture
 
-| Evaluation Dimension | Direction A: Clinical-First (PACS/DICOM) | Direction B: Premium SaaS (Linear/Stripe) | Direction C: Medical AI (RetCAD/ARDA) | **RECOMMENDED: EYERIS Hybrid** |
-| :--- | :---: | :---: | :---: | :---: |
-| **Clinical Trust & Authority** | 5/5 | 3/5 | 4/5 | **5/5** (Diagnostic dark canvas + clinical framing) |
-| **Workflow Usability & Speed** | 2/5 | 5/5 | 4/5 | **5/5** (Linear-style keyboard shortcuts & 2-click flow)|
-| **Visual Quality & Polish** | 3/5 | 5/5 | 4/5 | **5/5** (Refined slate surfaces, 8px grid precision) |
-| **Information Density Balance** | 4/5 | 4/5 | 4/5 | **5/5** (High-density telemetry without clutter) |
-| **Implementation Complexity** | High | Low | Medium | **Balanced** (Pure HTML5 Canvas/CSS, zero DICOM overhead) |
-| **SIH Demonstration Impact** | 3/5 | 4/5 | 4/5 | **5/5** (Scientifically credible, explainable, modern) |
-| **TOTAL SCORE (out of 30)** | **21/30** | **25/30** | **25/30** | **29/30** |
+When multiple conditions occur simultaneously, the system enforces strict hierarchical precedence:
+
+```
++---------------------------------------------------------------------------------------------------------+
+|                                  CLINICAL STATE PRECEDENCE HIERARCHY                                    |
++-------------+-----------------------+--------------------------+----------------------------------------+
+| Precedence  | State Name            | Qualifying Conditions    | Clinical Decision & Behavior           |
++-------------+-----------------------+--------------------------+----------------------------------------+
+| PRIORITY 1  | State B: Image Quality| quality < 0.60 OR        | • Grading HALTED                       |
+| (Highest)   | Failure               | is_gradable == False     | • Recapture required                   |
+|             |                       |                          | • If recapture fails: Manual Review    |
+|             |                       |                          | • Referral: FALSE / INVALID            |
+|             |                       |                          | • Never overridden by model confidence |
++-------------+-----------------------+--------------------------+----------------------------------------+
+| PRIORITY 2  | State A: Model        | Quality passes, but      | • Classification WITHHELD              |
+|             | Unavailable           | weights missing/offline  | • Clinical review REQUIRED             |
+|             |                       |                          | • No negative result inferred          |
+|             |                       |                          | • Referral: FALSE / NOT DETERMINED     |
++-------------+-----------------------+--------------------------+----------------------------------------+
+| PRIORITY 3  | State C: High Model   | Quality passes, model    | • Classification flagged as UNCERTAIN  |
+|             | Uncertainty           | runs, but unc > 0.35 OR  | • Clinical review REQUIRED             |
+|             |                       | is_uncertain == True     | • Referral status: NOT DETERMINED      |
+|             |                       |                          | • Never automatically sets Referral=TRUE|
++-------------+-----------------------+--------------------------+----------------------------------------+
+| PRIORITY 4  | State D: Referral     | Quality passes, model    | • Staging: Stated by backend grade     |
+| (Lowest)    | Decision (Policy)     | available, unc <= 0.35   | • Referral: Determined by backend      |
+|             |                       |                          | • Urgency: Determined by backend       |
+|             |                       |                          | • Human review: Stated by backend      |
++-------------+-----------------------+--------------------------+----------------------------------------+
+```
 
 ---
 
@@ -107,11 +119,12 @@ graph TD
 | :---: | :--- | :--- | :--- | :---: |
 | **DEC-01** | Color Palette | Diagnostic Slate Dark Theme (`#090D16` canvas, `#131C2E` cards) | Eliminates ocular fatigue; optimizes contrast for dark retinal lesions. | Critical |
 | **DEC-02** | Quality Gate | Pre-inference card halting grading if quality score $<0.60$ | Prevents ungradable images from receiving reassuring false-negative grades. | Critical |
-| **DEC-03** | Decoupled States | Independent states for Unavailability, Quality, Uncertainty, Referral | Prevents unassessed or poor-quality images from polluting referral queues. | Critical |
+| **DEC-03** | Decoupled States | Independent states with strict 4-tier precedence hierarchy | Prevents unassessed or poor-quality images from polluting referral queues. | Critical |
 | **DEC-04** | Opacity & Bypass | Viewport opacity slider ($0–100\%$) + Hold Spacebar shortcut | Ensures raw anatomical retinal structures remain continuously verifiable. | Critical |
 | **DEC-05** | Causality Notice | Explicit disclaimer on all Grad-CAM attention views | Prevents clinicians from misinterpreting model correlation as causality. | Critical |
 | **DEC-06** | Role Modes | Presentation-only switcher consuming identical API payload | Tailors density for operators and specialists without engine divergence. | High |
 | **DEC-07** | Print Engine | Pure CSS `@media print` A4 medical summary sheet | Flawless physical documentation without heavy server-side PDF dependencies. | High |
+| **DEC-08** | Uncertainty Rule | Uncertainty alone sets Referral to `Not determined` | Preserves clinical safety; avoids false-positive automated referrals. | Critical |
 
 ---
 
@@ -121,9 +134,8 @@ graph TD
 ================================================================================
 FINAL VERDICT: AWAITING MEMBER 4 DESIGN APPROVAL
 ================================================================================
-Revision 1 fully integrates all twelve Member 4 approved design decisions.
-Mathematical contrast compliance, decoupled state architecture, causality
-disclaimers, and wireframe example labeling are strictly documented.
+Revision 2 establishes the final clinical state model, mathematical contrast
+verification, strict state precedence, and complete removal of unannotated figures.
 No UI implementation code has been written, and no Git commits performed.
 ================================================================================
 ```

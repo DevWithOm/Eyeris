@@ -1,26 +1,27 @@
-# EYERIS — Reusable Component Specifications & Architecture (Revision 1)
+# EYERIS — Reusable Component Specifications & Architecture (Revision 2)
 **Subsystem**: UI/UX Component Engineering  
-**Role**: Senior Product Designer & Design Systems Engineer (Member 4)  
+**Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
+**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
 
 ---
 
-## 1. Member 4 Approved Design Decisions
+## 1. Member 4 Approved Design Decisions (Revision 2 Final)
 
-This revised component architecture integrates the following governance rules:
+This revised component architecture integrates the following audited decisions:
 1. **Primary Showcase Component**: Elevates the **Dual-Pane Retinal Image Viewer (`DualImageViewer.jsx`)** as the primary interactive and technical centerpiece.
 2. **Anatomical Visibility Guarantee**: Ensures raw preprocessed fundus images remain accessible regardless of active overlays via continuous opacity control ($0–100\%$), side-by-side viewports, and spacebar raw reveal.
 3. **Causality Guardrail**: Explicitly annotates Grad-CAM components with a mandatory notice stating that activation maps indicate feature correlation density, not anatomical lesion causality.
-4. **Distinct Component States**: Provides dedicated, decoupled UI components for:
-   - *State A: Model Unavailability* (`ModelOfflineAlert.jsx`)
-   - *State B: Image Quality Failure* (`QualityWarningModal.jsx`)
-   - *State C: High Model Uncertainty* (`UncertaintyAlertBadge.jsx`)
-   - *State D: Clinical Referral Guidance* (`ReferralBanner.jsx`)
+4. **Distinct Component States & Strict Precedence**:
+   - *State B (Precedence 1 - Highest)*: Image Quality Failure (`QualityWarningModal.jsx`) — Halts grading; requires recapture or manual review; referral is invalid/false.
+   - *State A (Precedence 2)*: Model Unavailability (`ModelOfflineAlert.jsx`) — Classification withheld; manual review required; referral is false/not determined.
+   - *State C (Precedence 3)*: High Model Uncertainty (`UncertaintyAlertBadge.jsx`) — Classification withheld or marked uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`.
+   - *State D (Precedence 4 - Lowest)*: Clinical Referral (`ReferralBanner.jsx`) — Referral indication and urgency are dictated directly by backend decision policy. The frontend never hardcodes universal urgency mappings or clinical timeframes.
 5. **Multi-Channel Accessibility**: Color is never used alone (WCAG 1.4.1); every clinical severity component combines an icon shape, a text label, and a numeric grade.
-6. **Provisional Engineering Values**: Quality threshold 0.60 and uncertainty threshold 0.35 are documented as configurable parameters, not certified clinical standards.
-7. **Role-Aware Presentation**: Operator Mode and Specialist Mode toggles adapt component density and layout without modifying the underlying decision engine.
+6. **Button Contrast Standard**: Standardizes on `#2563EB` (luminance 0.1537) for primary buttons, guaranteeing **5.17:1** contrast with white text (`#FFFFFF`) and passing WCAG 1.4.3 AA. Focus indicators use `#3B82F6` (4.63:1 against surface, passing WCAG 1.4.11).
+7. **Provisional Engineering Values**: Quality threshold 0.60 and uncertainty threshold 0.35 are documented as configurable parameters, not certified clinical standards.
+8. **Role-Aware Presentation**: Operator Mode and Specialist Mode toggles adapt component density and layout without modifying the underlying decision engine.
 
 ---
 
@@ -38,7 +39,7 @@ This revised component architecture integrates the following governance rules:
 |                                                   |                                                     |
 |             True-Color Preprocessed Fundus        |             Grad-CAM Attention Heatmap              |
 |             (Macula & Optic Disc)                 |             (Class 4 / Neovascularization)          |
-|                                                   |             Overlaid with 70% Opacity               |
+|                                                   |             Overlaid with Adjustable Opacity        |
 |                                                   |                                                     |
 |                                                   |                                                     |
 +---------------------------------------------------+-----------------------------------------------------+
@@ -60,45 +61,49 @@ This revised component architecture integrates the following governance rules:
 
 ---
 
-## 3. Decoupled Clinical & System State Components
+## 3. Decoupled Clinical State Components & Precedence
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-|                                    DECOUPLED ARCHITECTURAL STATE MATRIX                                 |
-+--------------------------+-----------------------+------------------------+-----------------------------+
-| STATE A: MODEL OFFLINE   | STATE B: QUALITY FAIL | STATE C: HIGH UNCERTAIN| STATE D: CLINICAL REFERRAL  |
-+--------------------------+-----------------------+------------------------+-----------------------------+
-| • Model weights pending  | • Quality score < 0.60| • Uncertainty > 0.35   | • ICDR Grade 2, 3, or 4     |
-| • Referral: FALSE        | • Referral: FALSE     | • Referral: TRUE       | • Referral: TRUE            |
-| • Review Required: TRUE  | • Grading Halted      | • Urgency: Urgent Rev  | • Tiered Clinical Timeframe |
-| • Urgency: Manual Review | • Urgency: Recapture  | • Specialist Arbitrate | • Routine / Prompt / Urgent |
-+--------------------------+-----------------------+------------------------+-----------------------------+
+|                                    CLINICAL STATE ARCHITECTURE & PRECEDENCE                             |
++-----------------------+--------------------------+------------------------+-----------------------------+
+| STATE B (PRIORITY 1)  | STATE A (PRIORITY 2)     | STATE C (PRIORITY 3)   | STATE D (PRIORITY 4)        |
+| Quality Failure       | Model Unavailable        | High Uncertainty       | Referral Decision           |
++-----------------------+--------------------------+------------------------+-----------------------------+
+| • Quality score < 0.60| • Model weights pending  | • Uncertainty > 0.35   | • Quality & Models Valid    |
+| • Grading HALTED      | • Classification withheld| • Classification uncert| • Staging: Stated by backend|
+| • Recapture required  | • Referral: FALSE        | • Referral: NOT DET.   | • Referral: Stated by policy|
+| • Review if recap fail| • Review Required: TRUE  | • Review Required: TRUE| • Urgency: Stated by policy |
+| • Referral: FALSE     | • Urgency: Manual Review | • Urgency: Urgent Rev  | • Human Review: Stated by pol|
+| • Overrides all states| • No negative inferred   | • Never sets Refer=TRUE| • No invented timeframes    |
++-----------------------+--------------------------+------------------------+-----------------------------+
 ```
 
-### 3.1 State A: Model Unavailability Component (`ModelOfflineAlert.jsx`)
-- **Trigger**: Real model weights missing (`ai_models/classifier/weights/` unharvested).
-- **Presentation**: Amber status badge `[⏸] Manual Review Required` + Information Card: *"Automated classification model is currently offline. Case queued for manual ophthalmologist grading. No referral decision generated."*
-- **Clinical Safety Rule**: Prevents unassessed cases from polluting hospital referral queues.
-
-### 3.2 State B: Image Quality Failure Modal (`QualityWarningModal.jsx`)
+### 3.1 State B: Image Quality Failure Modal (`QualityWarningModal.jsx`) — Precedence 1
 - **Trigger**: `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`.
-- **Presentation**: High-contrast amber modal `[⚠] Image Quality Insufficient for Automated Grading`.
-- **Content**: Specific defect breakdown (e.g. *"Severe corneal reflection / optical blur"*) + Action button: `[ Recapture Retinal Photograph ]`.
-- **Clinical Safety Rule**: Halts automated classification to prevent ungradable scans from generating false reassurance.
+- **Presentation**: High-contrast modal `[⚠] Image Quality Insufficient for Automated Grading`.
+- **Content**: Specific defect breakdown (e.g. *"Corneal reflection / optical blur"*) + Action: `[ Recapture Retinal Photograph ]`. If recapture is unavailable or fails, routes to `[ Queue for Manual Review ]`.
+- **Clinical Safety Rule**: Overrides all downstream processing. Never generates a reassuring grade or a referral from an invalid scan.
 
-### 3.3 State C: Model Uncertainty Alert (`UncertaintyAlertBadge.jsx`)
+### 3.2 State A: Model Unavailability Component (`ModelOfflineAlert.jsx`) — Precedence 2
+- **Trigger**: Real model weights missing (`ai_models/classifier/weights/` unharvested or service offline).
+- **Presentation**: Amber status badge `[⏸] Manual Review Required` + Information Card: *"Automated classification model is currently offline. Case queued for manual ophthalmologist grading. No negative result inferred. No referral decision generated."*
+- **Clinical Safety Rule**: Prevents unassessed cases from falsely polluting referral queues.
+
+### 3.3 State C: Model Uncertainty Alert (`UncertaintyAlertBadge.jsx`) — Precedence 3
 - **Trigger**: Epistemic uncertainty score $>0.35$ (provisional engineering threshold) or `is_uncertain == True`.
-- **Presentation**: Violet badge `[🛡] High Model Uncertainty Detected`.
-- **Content**: Telemetry card displaying temperature-calibrated probability alongside an explicit uncertainty margin.
-- **Clinical Safety Rule**: Flags borderline or ambiguous cases for specialist human confirmation.
+- **Presentation**: Violet badge `[🛡] High Model Uncertainty Detected — Specialist Review Required`.
+- **Content**: Telemetry card displaying temperature-calibrated probability alongside an explicit uncertainty margin. **Referral status displays as `Not determined`**.
+- **Clinical Safety Rule**: High uncertainty indicates ambiguity, not confirmed pathology; it must **never** automatically set `Referral = TRUE`.
 
-### 3.4 State D: Clinical Referral Banner (`ReferralBanner.jsx`)
-- **Trigger**: Verified ICDR Grade $\ge 2$ with adequate image quality.
-- **Presentation**: Tiered referral card:
-  - *Grade 4 (PDR)*: Crimson `[⯄] URGENT SPECIALIST REFERRAL (1–2 Weeks)` — High risk of severe vision loss.
-  - *Grade 3 (Severe NPDR)*: Orange `[▲] PROMPT OPHTHALMOLOGY REFERRAL (2–4 Weeks)`.
-  - *Grade 2 (Moderate NPDR)*: Amber `[◆] ROUTINE CLINICAL REFERRAL (4–8 Weeks)`.
-  - *Grade 0 / 1 (Normal / Mild)*: Emerald `[●] ROUTINE ANNUAL SCREENING`.
+### 3.4 State D: Clinical Referral Banner (`ReferralBanner.jsx`) — Precedence 4
+- **Trigger**: Validated scan with available models and acceptable uncertainty.
+- **Presentation**: Renders the exact triage output supplied by the backend decision policy:
+  - *Screening Grade*: Stated by backend (e.g. `Grade 4 — Proliferative DR`, `Grade 2 — Moderate NPDR`, `Grade 0 — No DR`).
+  - *Referral Indication*: Stated by backend (`Yes` / `No`).
+  - *Clinical Urgency*: Stated by backend (`urgent`, `prompt`, `routine`, `annual_screening`).
+  - *Required Human Review*: Stated by backend (`Required` / `Routine Monitoring`).
+- **Clinical Safety Rule**: Frontend never invents universal clinical urgency mappings or unauthorized timeframes (e.g. "1–2 weeks" is only displayed if provided by the backend policy payload).
 
 ---
 
@@ -110,7 +115,7 @@ Both modes consume the exact same underlying pipeline contract from `/api/v1/scr
 graph TD
     API[FastAPI /api/v1/screenings Contract] --> Payload[Unified Screening Result Payload]
     Payload --> ModeSwitch{Role-Aware Presentation Switcher}
-    ModeSwitch -->|Operator Mode| OpView[Simplified Triage: Image Quality Card + Referral Banner + 2-Click Upload]
+    ModeSwitch -->|Operator Mode| OpView[Simplified Triage: Quality Card + Referral Status + 2-Click Upload]
     ModeSwitch -->|Specialist Mode| SpecView[Clinical Workspace: Dual-Pane Viewport + Opacity Slider + Probability Distribution]
 ```
 
