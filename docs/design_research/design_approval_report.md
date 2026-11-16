@@ -1,27 +1,27 @@
-# EYERIS — UI/UX Design Research Approval Report & Strategic Blueprint (Revision 2)
+# EYERIS — UI/UX Design Research Approval Report & Strategic Blueprint (Final Gate Closure)
 **Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System (SIH Problem Statement PS26038)  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
+**Status**: Final Design Approval Gate Specification (Referral Terminology Standardized)  
 **Target Branch**: `om`  
 
 ---
 
-## 1. Member 4 Approved Design Decisions (Revision 2 Final)
+## 1. Member 4 Approved Design Decisions (Final Gate Closure)
 
-The following foundational architectural decisions have been formally approved and verified:
+The following twelve foundational architectural decisions have been formally approved and verified:
 
 1. **Hybrid Product Identity**: Preserved the strategic synthesis of Clinical PACS reading room ergonomics, Premium SaaS high-density productivity, and Medical AI explainability.
 2. **Visual Ergonomics**: Standardized on the Diagnostic Slate Dark Palette (`#090D16`), Inter typography with tabular numerals (`tnum`), and a collapsible 240px sidebar.
 3. **Primary Showcase**: Elevated the **Retinal Image Analysis Workspace (Screening Details)** as the primary technical and clinical centerpiece of the application.
 4. **Strictly Labeled Illustrative Content**: Removed all unannotated numerical metrics. Every wireframe case, score, percentage, lesion count, date, and patient ID is explicitly labeled as `[Illustrative Example: e.g. N]` or neutral schema placeholders.
-5. **Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are documented strictly as configurable, provisional engineering heuristics. They are **not** clinically validated operating points.
+5. **Configurable Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are documented strictly as configurable, provisional engineering heuristics. They are **not** clinically validated operating points.
 6. **Causality Disclaimer**: Grad-CAM heatmaps are strictly defined as visual correlations of deep feature activation density. The UI explicitly forbids implying that Grad-CAM establishes anatomical lesion causality.
-7. **Rigorous Clinical State Precedence**: Enforced an unambiguous 4-tier state precedence hierarchy:
-   - *Precedence 1: State B — Image Quality Failure* (Grading halted; recapture required; if recapture unavailable, manual clinical review required; never produces a reassuring grade or a referral).
-   - *Precedence 2: State A — Model Unavailable* (Classification withheld; clinical review required; no inferred negative result; no automated referral).
-   - *Precedence 3: State C — High Uncertainty* (Classification withheld or marked uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`).
-   - *Precedence 4: State D — Referral Indicated* (Referral indication and urgency are dictated directly by backend decision policy; no hardcoded universal urgency mapping or invented clinical timeframes in the frontend).
+7. **Rigorous Clinical State Precedence & Standardized Referral Model**: Enforced an unambiguous 4-tier state precedence hierarchy with four standardized referral states:
+   - *Precedence 1: State B — Image Quality Failure* (Grading halted; recapture required; if recapture unavailable, manual clinical review required; referral status: **`NOT_ASSESSED`**; never produces a reassuring grade or a referral).
+   - *Precedence 2: State A — Model Unavailable* (Classification withheld; clinical review required; no inferred negative result; referral status: **`NOT_ASSESSED`**).
+   - *Precedence 3: State C — High Uncertainty* (Classification withheld or marked uncertain; clinical review required; referral status: **`NOT_DETERMINED`**; high uncertainty alone never indicates referral).
+   - *Precedence 4: State D — Referral Decision* (Referral status is strictly **`INDICATED`** or **`NOT_INDICATED`**, and urgency tier is dictated directly by backend decision policy; no hardcoded universal urgency mapping or invented clinical timeframes in the frontend).
 8. **Mathematical WCAG 2.2 AA Contrast Compliance**: Verified all color pairings using exact relative luminance calculations. Corrected previously reported contrast values for `#3B82F6` (4.63:1 non-text focus indicator against surface), `#67E8F9` (11.75:1), and `#FEF08A` (14.63:1). Standardized on `#2563EB` (5.17:1 with white text) for primary buttons.
 9. **Multi-Channel Accessibility**: Color is never the sole communicator of clinical urgency or system health (pairing color with text labels, numeric grades, and distinct icon geometry).
 10. **Anatomical Visibility Guarantee**: Guaranteed that raw, preprocessed fundus images remain instantly accessible at all times via opacity sliders ($0–100\%$), dual-pane comparative viewports, and press-and-hold spacebar inspection.
@@ -78,7 +78,7 @@ graph TD
 
 ---
 
-## 5. Clinical State Precedence Architecture
+## 5. Clinical State Precedence & Referral Terminology Architecture
 
 When multiple conditions occur simultaneously, the system enforces strict hierarchical precedence:
 
@@ -86,30 +86,36 @@ When multiple conditions occur simultaneously, the system enforces strict hierar
 +---------------------------------------------------------------------------------------------------------+
 |                                  CLINICAL STATE PRECEDENCE HIERARCHY                                    |
 +-------------+-----------------------+--------------------------+----------------------------------------+
-| Precedence  | State Name            | Qualifying Conditions    | Clinical Decision & Behavior           |
+| Precedence  | State Name            | Qualifying Conditions    | Clinical Decision & Referral Status    |
 +-------------+-----------------------+--------------------------+----------------------------------------+
 | PRIORITY 1  | State B: Image Quality| quality < 0.60 OR        | • Grading HALTED                       |
 | (Highest)   | Failure               | is_gradable == False     | • Recapture required                   |
 |             |                       |                          | • If recapture fails: Manual Review    |
-|             |                       |                          | • Referral: FALSE / INVALID            |
-|             |                       |                          | • Never overridden by model confidence |
+|             |                       |                          | • Referral: NOT_ASSESSED               |
+|             |                       |                          | • Overrides all downstream models      |
 +-------------+-----------------------+--------------------------+----------------------------------------+
 | PRIORITY 2  | State A: Model        | Quality passes, but      | • Classification WITHHELD              |
 |             | Unavailable           | weights missing/offline  | • Clinical review REQUIRED             |
 |             |                       |                          | • No negative result inferred          |
-|             |                       |                          | • Referral: FALSE / NOT DETERMINED     |
+|             |                       |                          | • Referral: NOT_ASSESSED               |
 +-------------+-----------------------+--------------------------+----------------------------------------+
 | PRIORITY 3  | State C: High Model   | Quality passes, model    | • Classification flagged as UNCERTAIN  |
 |             | Uncertainty           | runs, but unc > 0.35 OR  | • Clinical review REQUIRED             |
-|             |                       | is_uncertain == True     | • Referral status: NOT DETERMINED      |
-|             |                       |                          | • Never automatically sets Referral=TRUE|
+|             |                       | is_uncertain == True     | • Referral status: NOT_DETERMINED      |
+|             |                       |                          | • Never automatically INDICATED        |
 +-------------+-----------------------+--------------------------+----------------------------------------+
 | PRIORITY 4  | State D: Referral     | Quality passes, model    | • Staging: Stated by backend grade     |
-| (Lowest)    | Decision (Policy)     | available, unc <= 0.35   | • Referral: Determined by backend      |
-|             |                       |                          | • Urgency: Determined by backend       |
+| (Lowest)    | Decision (Policy)     | available, unc <= 0.35   | • Referral: INDICATED or NOT_INDICATED |
+|             |                       |                          | • Urgency: Stated by backend policy    |
 |             |                       |                          | • Human review: Stated by backend      |
 +-------------+-----------------------+--------------------------+----------------------------------------+
 ```
+
+### Standardized Referral Status Model:
+- **`NOT_ASSESSED`**: Image quality failure or model unavailable; no valid referral assessment exists. Never report as `FALSE` or negative.
+- **`NOT_DETERMINED`**: Model output is uncertain; clinical review required. High uncertainty alone never sets referral as indicated.
+- **`INDICATED`**: Referral explicitly indicated by the backend decision policy.
+- **`NOT_INDICATED`**: Referral explicitly not indicated by the backend decision policy.
 
 ---
 
@@ -124,7 +130,7 @@ When multiple conditions occur simultaneously, the system enforces strict hierar
 | **DEC-05** | Causality Notice | Explicit disclaimer on all Grad-CAM attention views | Prevents clinicians from misinterpreting model correlation as causality. | Critical |
 | **DEC-06** | Role Modes | Presentation-only switcher consuming identical API payload | Tailors density for operators and specialists without engine divergence. | High |
 | **DEC-07** | Print Engine | Pure CSS `@media print` A4 medical summary sheet | Flawless physical documentation without heavy server-side PDF dependencies. | High |
-| **DEC-08** | Uncertainty Rule | Uncertainty alone sets Referral to `Not determined` | Preserves clinical safety; avoids false-positive automated referrals. | Critical |
+| **DEC-08** | Referral Status Model| Four standardized states: `NOT_ASSESSED`, `NOT_DETERMINED`, `INDICATED`, `NOT_INDICATED` | Prevents misleading negative conclusions on invalid or unassessed scans. | Critical |
 
 ---
 
@@ -132,10 +138,11 @@ When multiple conditions occur simultaneously, the system enforces strict hierar
 
 ```
 ================================================================================
-FINAL VERDICT: AWAITING MEMBER 4 DESIGN APPROVAL
+FINAL VERDICT: AWAITING MEMBER 4 DESIGN IMPLEMENTATION AUTHORIZATION
 ================================================================================
-Revision 2 establishes the final clinical state model, mathematical contrast
-verification, strict state precedence, and complete removal of unannotated figures.
+Revision 2 final gate closure standardizes the four-state clinical referral model,
+enforces strict image-quality precedence, and eliminates all contradictory uses of
+FALSE or unvalidated clinical timeframes across the design documentation suite.
 No UI implementation code has been written, and no Git commits performed.
 ================================================================================
 ```

@@ -1,27 +1,32 @@
-# EYERIS — Screen-by-Screen UI/UX Design Blueprint (Revision 2)
+# EYERIS — Screen-by-Screen UI/UX Design Blueprint (Final Gate Closure)
 **Subsystem**: UI/UX Architecture & Screen Specifications  
 **Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
+**Status**: Final Design Approval Gate Specification (Referral Terminology Standardized)  
 
 ---
 
-## 1. Member 4 Approved Design Decisions (Revision 2 Final)
+## 1. Member 4 Approved Design Decisions (Final Gate Closure)
 
 This revised screen blueprint incorporates the following audited decisions:
 1. **Primary Technical Showcase**: Designates **Screen 4: Screening Details (Retinal Image Analysis Workspace)** as the primary technical and clinical centerpiece of the system.
 2. **Explicitly Labeled Illustrative Content**: Removes all unannotated numerical figures. Every wireframe case, score, percentage, lesion count, date, and patient ID is explicitly labeled as `[Illustrative Example: e.g. N]` or neutral schema placeholders.
-3. **Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are explicitly designated as configurable engineering parameters awaiting clinical dataset calibration.
+3. **Configurable Provisional Engineering Values**: Quality threshold `0.60` and uncertainty threshold `0.35` are explicitly designated as configurable engineering parameters awaiting clinical dataset calibration.
 4. **Causality Guardrail**: The retinal workspace includes an obligatory notice: *"Class activation heatmaps visualize deep network feature correlations and do not demonstrate anatomical lesion causality."*
-5. **Strict Clinical State Precedence**:
-   - *Precedence 1 (State B): Image Quality Failure* — Halts grading; requires recapture (or clinical review if recapture fails); referral is invalid/false; never overridden by model confidence.
-   - *Precedence 2 (State A): Model Unavailable* — Classification withheld; clinical review required; no negative result inferred; no automated referral.
-   - *Precedence 3 (State C): High Model Uncertainty* — Classification withheld or marked uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`.
-   - *Precedence 4 (State D): Referral Decision* — Referral indication, urgency tier, and human review requirements are supplied directly by backend policy; no hardcoded universal urgency mapping or invented timeframes in the frontend.
-6. **Role-Aware Presentation Layer**: Operator Mode and Specialist Mode share the exact same underlying pipeline API and decision payload; they represent presentation-only view toggles.
-7. **Accessible Fundus Inspection**: The raw, true-color fundus photograph is guaranteed to be accessible at all times via opacity sliders ($0–100\%$), dual-pane comparison, and spacebar reveal.
-8. **Multi-Channel Accessibility**: Color is never the sole indicator; every state has an icon, text, and numeric level.
+5. **Standardized 4-Value Referral Status Model**:
+   - `NOT_ASSESSED`: Quality failure (State B) or model unavailable (State A); no valid referral assessment exists. Never report as `FALSE` or negative.
+   - `NOT_DETERMINED`: Model output is uncertain (State C); clinical review required; high uncertainty alone never sets referral as indicated.
+   - `INDICATED`: Referral explicitly indicated by the backend decision policy (State D).
+   - `NOT_INDICATED`: Referral explicitly not indicated by the backend decision policy (State D).
+6. **Strict Clinical State Precedence**:
+   - *Precedence 1 (State B): Image Quality Failure* — Halts grading; requires recapture (or clinical review if recapture fails); referral status is **`NOT_ASSESSED`**; never overridden by model confidence.
+   - *Precedence 2 (State A): Model Unavailable* — Classification withheld; clinical review required; no negative result inferred; referral status is **`NOT_ASSESSED`**.
+   - *Precedence 3 (State C): High Model Uncertainty* — Classification withheld or marked uncertain; clinical review required; referral status is **`NOT_DETERMINED`**; high uncertainty alone never sets `INDICATED`.
+   - *Precedence 4 (State D): Referral Decision* — Referral status (`INDICATED` / `NOT_INDICATED`), urgency tier, and human review requirements are supplied directly by backend policy; no hardcoded universal urgency mapping or invented timeframes in the frontend.
+7. **Role-Aware Presentation Layer**: Operator Mode and Specialist Mode share the exact same underlying pipeline API and decision payload; they represent presentation-only view toggles.
+8. **Accessible Fundus Inspection**: The raw, true-color fundus photograph is guaranteed to be accessible at all times via opacity sliders ($0–100\%$), dual-pane comparison, and spacebar reveal.
+9. **Multi-Channel Accessibility**: Color is never the sole indicator; every state has an icon, text, and numeric level.
 
 ---
 
@@ -42,7 +47,7 @@ This revised screen blueprint incorporates the following audited decisions:
 +---------------------------------------------------------------------------------------------------------+
 | [Operational Telemetry Bar - Derived Strictly from Database Records]                                    |
 | +--------------------+ +--------------------+ +--------------------+ +--------------------+             |
-| | Total Screenings   | | Urgent Referrals   | | Pending Review     | | Quality Rejections |             |
+| | Total Screenings   | | Indicated Referral | | Pending Review     | | Quality Rejections |             |
 | | [Illustrative: 128]| | [Illustrative: 14] | | [Illustrative: 6]  | | [Illustrative: 3]  |             |
 | | (Total DB Records) | | (Backend Policy)   | | (Offline/Uncertain)| | (Quality < 0.60)   |             |
 | +--------------------+ +--------------------+ +--------------------+ +--------------------+             |
@@ -53,13 +58,13 @@ This revised screen blueprint incorporates the following audited decisions:
 | +---------------------------------------------------+ | +---------------------------------------------+ |
 | | [Search Case ID...] [Filter: All / Referrals]     | | | Quick Actions:                              | |
 | | +-----------------------------------------------+ | | | [ + Start New Screening ]                   | |
-| | | Case ID   | Exam Date | Grade   | Urgency| Act| | | | [ View Pending Review Queue ([Ex: 6]) ]     | |
-| | | EYE-A1B2  | [Ex:Date] | Mod [2] | Policy |View| | | +---------------------------------------------+ |
-| | | EYE-9F40  | [Ex:Date] | PDR [4] | Policy |View| | | AI Model Availability Subsystems:             | |
-| | | EYE-3C81  | [Ex:Date] | Ungrad  | RECAP  |View| | | - Quality Check:  🟢 Operational (Heuristic) | |
-| | +-----------------------------------------------+ | | | - DR Classifier:  🟡 Offline (Safe Fallback)| |
-| | (Link to full Screening History Registry)         | | | - Segmentation:   🟡 Offline (Safe Fallback)| |
-| +---------------------------------------------------+ | | - Explainability: 🟡 Offline (Safe Fallback)| |
+| | | Case ID   | Exam Date | Grade   | Referral Status| | | [ View Pending Review Queue ([Ex: 6]) ]     | |
+| | | EYE-A1B2  | [Ex:Date] | Mod [2] | INDICATED      | | +---------------------------------------------+ |
+| | | EYE-9F40  | [Ex:Date] | PDR [4] | INDICATED      | | AI Model Availability Subsystems:             | |
+| | | EYE-3C81  | [Ex:Date] | Ungrad  | NOT_ASSESSED   | | - Quality Check:  🟢 Operational (Heuristic) | |
+| | +-----------------------------------------------+ | | - DR Classifier:  🟡 Offline (Safe Fallback)| |
+| | (Link to full Screening History Registry)         | | - Segmentation:   🟡 Offline (Safe Fallback)| |
+| +---------------------------------------------------+ | - Explainability: 🟡 Offline (Safe Fallback)| |
 |                                                       | +---------------------------------------------+ |
 +---------------------------------------------------------------------------------------------------------+
 ```
@@ -109,7 +114,7 @@ This revised screen blueprint incorporates the following audited decisions:
 
 ### 2.3 Instant Quality Rejection Handling (State B — Precedence 1)
 If the backend quality evaluation yields `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`:
-- Automated grading is **strictly halted**. No reassuring grade or referral is derived.
+- Automated grading is **strictly halted**. Referral status is **`NOT_ASSESSED`** (never reported as negative or false).
 - An amber **Quality Warning Modal** appears:
   - Header: `[⚠] Image Quality Insufficient for Automated Screening`
   - Cause: `Severe blur / corneal reflection detected in macular field.`
@@ -132,18 +137,18 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 | [Header] Screening History Registry ([Illustrative Total: e.g. 128])             [ 📥 Export CSV ]       |
 +---------------------------------------------------------------------------------------------------------+
 | [Filter Bar]                                                                                            |
-| [ 🔍 Search Case ID or Token... ] [ Status: All ▼ ] [ Urgency: All ▼ ] [ Eye: All ▼ ] [ Sort: Date ▼ ]  |
+| [ 🔍 Search Case ID or Token... ] [ Status: All ▼ ] [ Referral: All ▼ ] [ Eye: All ▼ ] [ Sort: Date ▼ ]  |
 +---------------------------------------------------------------------------------------------------------+
 | [High-Density Data Table]                                                                               |
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
-| | Case ID     | Screening Date   | Eye | Quality  | DR Grade  | Referral Urgency   | Action           | |
+| | Case ID     | Screening Date   | Eye | Quality  | DR Grade  | Referral Status    | Action           | |
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
-| | EYE-9F4081  | [Illustrative]   | OD  | [Ex:0.94]| [Ex: G4]  | 🔴 [⯄] Urgent Ref  | [ Open Analysis ]| |
-| | EYE-A1B290  | [Illustrative]   | OS  | [Ex:0.88]| [Ex: G2]  | 🟡 [◆] Routine Ref | [ Open Analysis ]| |
-| | EYE-5E2104  | [Illustrative]   | OD  | [Ex:0.92]| [Ex: G0]  | 🟢 [●] Annual Mon  | [ Open Analysis ]| |
-| | EYE-3C8144  | [Illustrative]   | OS  | [Ex:0.42]| Ungraded  | 🔴 [⚠] Recapture   | [ Open Analysis ]| |
-| | EYE-7B1990  | [Illustrative]   | OD  | [Ex:0.85]| Pending   | 🟣 [⏸] Manual Rev  | [ Open Analysis ]| |
-| | EYE-2D8812  | [Illustrative]   | OS  | [Ex:0.91]| Uncertain | 🟣 [🛡] Not Det.   | [ Open Analysis ]| |
+| | EYE-9F4081  | [Illustrative]   | OD  | [Ex:0.94]| [Ex: G4]  | 🔴 [⯄] INDICATED   | [ Open Analysis ]| |
+| | EYE-A1B290  | [Illustrative]   | OS  | [Ex:0.88]| [Ex: G2]  | 🟡 [◆] INDICATED   | [ Open Analysis ]| |
+| | EYE-5E2104  | [Illustrative]   | OD  | [Ex:0.92]| [Ex: G0]  | 🟢 [●] NOT_INDICATED| [ Open Analysis ]| |
+| | EYE-3C8144  | [Illustrative]   | OS  | [Ex:0.42]| Ungraded  | 🔴 [⚠] NOT_ASSESSED| [ Open Analysis ]| |
+| | EYE-7B1990  | [Illustrative]   | OD  | [Ex:0.85]| Pending   | 🟣 [⏸] NOT_ASSESSED| [ Open Analysis ]| |
+| | EYE-2D8812  | [Illustrative]   | OS  | [Ex:0.91]| Uncertain | 🟣 [🛡] NOT_DETERM. | [ Open Analysis ]| |
 | +-------------+------------------+-----+----------+-----------+--------------------+------------------+ |
 | [Pagination: Showing 1 - 25 of 128 records]                     [ < Previous ] [ 1 ] [ 2 ] [ Next > ]   |
 +---------------------------------------------------------------------------------------------------------+
@@ -164,7 +169,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 +---------------------------------------------------------------------------------------------------------+
 | [Top Bar] Case ID: EYE-9F4081 | Patient: #EX-8942 | Eye: Right (OD) | Date: [Illustrative] | [ 🖨 Report ]|
 +---------------------------------------------------------------------------------------------------------+
-| [Triage Banner: 🔴 [⯄] [Illustrative Policy Output: Referral Indicated — High Urgency per Backend Policy]]|
+| [Triage Banner: 🔴 [⯄] [Illustrative: Referral Status: INDICATED — Urgency: Urgent (Backend Policy)]]  |
 +---------------------------------------------------+-----------------------------------------------------+
 | LEFT PANE: Retinal Fundus Viewport (60% Width)    | RIGHT PANE: Diagnostic Telemetry (40% Width)        |
 |                                                   |                                                     |
@@ -175,11 +180,12 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 |                                                   | | Active Segment: [ 4: PDR (Crimson Red) ]        | |
 | +-----------------------------------------------+ | +-------------------------------------------------+ |
 | |                                               | |                                                     |
-| |             RETINAL FUNDUS CANVAS             | | 2. Calibrated Confidence & Epistemic Uncertainty  |
+| |             RETINAL FUNDUS CANVAS             | | 2. Clinical Referral Decision & Uncertainty       |
 | |                                               | | +-------------------------------------------------+ |
-| |         Synchronized Pan & Zoom Viewport      | | | Calibrated Probability: [Illustrative: e.g.91%]| |
-| |         Interactive Saliency Overlay          | | | Epistemic Uncertainty:  [Illustrative: e.g.0.08]|
-| |         Anatomical Landmark Preservation      | | | Uncertainty Status:     [Acceptable Range]      | |
+| |         Synchronized Pan & Zoom Viewport      | | | Referral Status:  [INDICATED / NOT_INDICATED /  | |
+| |         Interactive Saliency Overlay          | | |                   NOT_DETERMINED / NOT_ASSESSED]| |
+| |         Anatomical Landmark Preservation      | | | Escalation Urgency: [Supplied by Backend Policy]| |
+| |                                               | | | Epistemic Uncertainty:  [Illustrative: e.g.0.08]| |
 | |                                               | | | (Provisional Alert Threshold: > 0.35)           | |
 | |                                               | | +-------------------------------------------------+ |
 | +-----------------------------------------------+ |                                                     |
@@ -225,7 +231,7 @@ If the backend quality evaluation yields `overall_quality_score < 0.60` (provisi
 |  -----------------------------------------------------------------------------------------------------  |
 |  - Predicted Severity Staging: [Illustrative Example: Grade 4 — Proliferative Diabetic Retinopathy]     |
 |  - Calibrated Confidence:      [Illustrative Example: e.g. 91.4%]                                       |
-|  - Clinical Referral Status:   [Backend Decision Policy Output]                                         |
+|  - Clinical Referral Status:   [INDICATED / NOT_INDICATED / NOT_DETERMINED / NOT_ASSESSED]             |
 |  - Escalation Urgency:         [Backend Policy Urgency Tier]                                            |
 |  - Recommended Next Action:    [Backend Clinical Guidance Statement]                                    |
 |                                                                                                         |

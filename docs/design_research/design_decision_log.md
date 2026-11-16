@@ -1,13 +1,13 @@
-# EYERIS — UI/UX Design Decision Log & Architectural Traceability (Revision 2)
+# EYERIS — UI/UX Design Decision Log & Architectural Traceability (Final Gate Closure)
 **Subsystem**: UI/UX Governance & Decision Architecture  
 **Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
+**Status**: Final Design Approval Gate Specification (Referral Terminology Standardized)  
 
 ---
 
-## 1. Member 4 Approved Design Decisions (Revision 2 Final)
+## 1. Member 4 Approved Design Decisions (Final Gate Closure)
 
 The following twelve design governance decisions have been formally approved and logged as binding architectural requirements:
 
@@ -19,7 +19,7 @@ The following twelve design governance decisions have been formally approved and
 +---------+---------------------------------------------------------------------+-------------------------+
 | DEC-01  | Diagnostic Slate Dark Palette (#090D16 Canvas / #131C2E Cards)       | Visual & Ergonomics     |
 | DEC-02  | Instantaneous In-Chair Pre-Inference Quality Gating                 | Clinical Safety & Intake|
-| DEC-03  | Decoupled States with Strict 4-Tier Precedence Hierarchy            | Backend & State Machine |
+| DEC-03  | Decoupled States with Strict 4-Tier Precedence & Referral Model     | Backend & State Machine |
 | DEC-04  | Interactive Opacity Slider & Hold Spacebar Raw Fundus Bypass        | Retinal Viewport Tool   |
 | DEC-05  | Mandatory Attention Map Causality Guardrail Notice                  | Explainability Policy   |
 | DEC-06  | Strict Absence of Fabricated Metrics & Labeled Illustrative Data    | Data Integrity & Ethics |
@@ -48,21 +48,21 @@ The following twelve design governance decisions have been formally approved and
 ### DEC-02: Instantaneous In-Chair Pre-Inference Quality Gating
 - **Reference Source**: Digital Diagnostics LumineticsCore (IDx-DR) FDA K172818 Summary, Google Health ARDA Field Deployments.
 - **Observed Pattern**: Autonomous screening systems execute real-time image quality evaluation immediately upon photo intake. If quality is inadequate, the system halts inference and alerts the operator while the patient is still seated.
-- **EYERIS Adaptation**: In `model_orchestrator.py`, quality evaluation runs as the primary stage. If `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`, deep classification is halted. The UI renders an immediate **Quality Warning Modal** specifying defects and actionable reacquisition instructions.
+- **EYERIS Adaptation**: In `model_orchestrator.py`, quality evaluation runs as the primary stage. If `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`, deep classification is halted. The UI renders an immediate **Quality Warning Modal** specifying defects and actionable reacquisition instructions. Referral status is set strictly to **`NOT_ASSESSED`**.
 - **Reason for Adaptation**: Prevents ungradable images from generating false-negative reassuring grades, and prevents patients from departing before obtaining an adequate scan.
 - **Priority**: Critical.
 
 ---
 
-### DEC-03: Decoupled Architectural States with Strict 4-Tier Precedence Hierarchy
+### DEC-03: Decoupled Architectural States with Strict 4-Tier Precedence & Referral Model
 - **Reference Source**: NHS Diabetic Eye Screening Programme (DESP) Clinical Pathways, Eyeris Clinical Decision Engine.
-- **Observed Pattern**: Research prototypes frequently conflate "offline model" or "image quality failure" with a clinical referral, artificially flooding tertiary hospital referral queues.
-- **EYERIS Adaptation**: Formally establishes a 4-tier precedence hierarchy:
-  1. *State B (Precedence 1 - Highest): Image Quality Failure*: `is_gradable: False`, `urgency: "recapture_required"`. Halts grading; if recapture unavailable, routes to manual review; referral is invalid/false; never overridden by model confidence.
-  2. *State A (Precedence 2): Model Unavailable*: Classification withheld; clinical review required; `referral_recommended: False`; no negative result inferred.
-  3. *State C (Precedence 3): High Model Uncertainty*: Uncertainty exceeds threshold (`0.35`); classification withheld or flagged uncertain; clinical review required; referral status is **`Not determined`**; high uncertainty alone never sets `Referral = TRUE`.
-  4. *State D (Precedence 4 - Lowest): Referral Indicated*: Referral recommendation, urgency tier, and human review requirements are supplied directly by backend policy. Frontend does not hardcode universal urgency mappings or invent clinical timeframes.
-- **Reason for Adaptation**: Protects hospital referral registries from false-positive saturation while guaranteeing every unassessed or uncertain case is routed to human clinician review.
+- **Observed Pattern**: Research prototypes frequently conflate "offline model" or "image quality failure" with a clinical referral, artificially flooding tertiary hospital referral queues, or misleadingly report `Referral: FALSE` for unassessed scans.
+- **EYERIS Adaptation**: Formally establishes a 4-tier precedence hierarchy with a standardized 4-value referral model:
+  1. *State B (Precedence 1 - Highest): Image Quality Failure*: `is_gradable: False`, `urgency: "recapture_required"`. Halts grading; if recapture unavailable, routes to manual review; referral status is strictly **`NOT_ASSESSED`** (never reported as negative or false); overrides all downstream models.
+  2. *State A (Precedence 2): Model Unavailable*: Classification withheld; clinical review required; referral status is strictly **`NOT_ASSESSED`**; no negative result inferred.
+  3. *State C (Precedence 3): High Model Uncertainty*: Uncertainty exceeds threshold (`0.35`); classification withheld or flagged uncertain; clinical review required; referral status is strictly **`NOT_DETERMINED`**; high uncertainty alone never sets referral to `INDICATED`.
+  4. *State D (Precedence 4 - Lowest): Referral Decision*: Referral status is strictly **`INDICATED`** or **`NOT_INDICATED`**, and urgency tier is supplied directly by backend policy. Frontend does not hardcode universal urgency mappings or invent clinical timeframes.
+- **Reason for Adaptation**: Protects hospital referral registries from false-positive saturation while guaranteeing every unassessed or uncertain case is routed to human clinician review without misleading negative labels.
 - **Priority**: Critical.
 
 ---

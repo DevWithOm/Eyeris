@@ -1,13 +1,13 @@
-# EYERIS — Final Visual Design System & Token Specification (Revision 2)
+# EYERIS — Final Visual Design System & Token Specification (Final Gate Closure)
 **Subsystem**: UI/UX Design System  
 **Role**: Senior Healthcare UX Architect & Design Systems Lead (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
 **Date**: November 16, 2026  
-**Status**: Revised Specification Incorporating Final Safety & Accessibility Audit  
+**Status**: Final Design Approval Gate Specification (Referral Terminology Standardized)  
 
 ---
 
-## 1. Member 4 Approved Design Decisions (Revision 2 Final)
+## 1. Member 4 Approved Design Decisions (Final Gate Closure)
 
 This revised design system incorporates the following twelve audited decisions:
 1. Standardizes on the Diagnostic Slate Dark Palette (`#090D16` root canvas, `#131C2E` elevated card surface).
@@ -19,7 +19,7 @@ This revised design system incorporates the following twelve audited decisions:
 7. Elevates the dual-pane retinal analysis workspace as the primary visual and technical showcase.
 8. Guarantees raw anatomical fundus visibility through continuous opacity adjustment ($0–100\%$) and a spacebar bypass.
 9. Enforces role-aware presentation modes (Operator View vs. Specialist View) that consume the identical backend contract without modifying the decision engine.
-10. Separates pipeline states into four distinct UI representations with strict precedence: Quality Failure (Priority 1), Model Unavailable (Priority 2), Model Uncertainty (Priority 3), and Referral Decision (Priority 4).
+10. Standardizes the 4-value referral status model across all states: **`NOT_ASSESSED`** (Quality failure / Model unavailable), **`NOT_DETERMINED`** (High uncertainty), **`INDICATED`** (Policy referral), and **`NOT_INDICATED`** (Policy non-referral). Never uses `Referral: FALSE` for invalid scans or offline models.
 11. Treats quality (0.60) and uncertainty (0.35) thresholds as configurable provisional engineering values, not certified clinical standards.
 12. Labels all wireframe metrics as illustrative examples and explicitly disclaims regulatory clearance.
 
@@ -63,25 +63,25 @@ $$\text{Contrast Ratio } CR = \frac{L_{\text{lighter}} + 0.05}{L_{\text{darker}}
 
 ---
 
-## 3. Multi-Channel Status Encoding (WCAG 1.4.1)
+## 3. Multi-Channel Status & Referral Encoding (WCAG 1.4.1)
 
-Color is never the sole communicator of clinical urgency or system health:
+Color is never the sole communicator of clinical urgency, referral status, or system health:
 
 ```
-+---------------------------------------------------------------------------------------------------------+
-|                                    MULTI-CHANNEL CLINICAL STATUS ENCODING                               |
-+--------------------------+-------------+---------------+-----------------------+------------------------+
-| Status State             | Icon Shape  | Color Code    | Explicit Text Label   | Numeric / System Code  |
-+--------------------------+-------------+---------------+-----------------------+------------------------+
-| Grade 0 (No DR)          | Circle  [●] | Green #10B981 | "Grade 0: No DR"      | ICDR Stage 0           |
-| Grade 1 (Mild NPDR)      | Square  [■] | Cyan  #06B6D4 | "Grade 1: Mild NPDR"  | ICDR Stage 1           |
-| Grade 2 (Moderate NPDR)  | Diamond [◆] | Amber #F59E0B | "Grade 2: Mod NPDR"   | ICDR Stage 2           |
-| Grade 3 (Severe NPDR)    | Triangle[▲] | Orange#F97316 | "Grade 3: Severe NPDR"| ICDR Stage 3           |
-| Grade 4 (Proliferative)  | Octagon [⯄] | Red   #EF4444 | "Grade 4: PDR"        | ICDR Stage 4           |
-| Model Uncertainty Gate   | Shield  [🛡] | Violet#8B5CF6 | "High Uncertainty"    | Status: Not determined |
-| Image Quality Rejection  | Warning [⚠] | Red   #DC2626 | "Recapture Required"  | Quality Score < 0.60   |
-| Model Unavailable State  | Pause   [⏸] | Yellow#EAB308 | "Manual Review"       | Status: pending_review |
-+--------------------------+-------------+---------------+-----------------------+------------------------+
++-------------------------------------------------------------------------------------------------------------------+
+|                                       MULTI-CHANNEL CLINICAL STATUS & REFERRAL ENCODING                           |
++--------------------------+-------------+---------------+-----------------------+------------------+---------------+
+| Clinical Condition       | Icon Shape  | Color Code    | Explicit Text Label   | Referral Status  | Urgency Tier  |
++--------------------------+-------------+---------------+-----------------------+------------------+---------------+
+| Grade 0 (No DR)          | Circle  [●] | Green #10B981 | "Grade 0: No DR"      | NOT_INDICATED    | annual_screen |
+| Grade 1 (Mild NPDR)      | Square  [■] | Cyan  #06B6D4 | "Grade 1: Mild NPDR"  | NOT_INDICATED    | routine_mon   |
+| Grade 2 (Moderate NPDR)  | Diamond [◆] | Amber #F59E0B | "Grade 2: Mod NPDR"   | INDICATED        | routine_refer |
+| Grade 3 (Severe NPDR)    | Triangle[▲] | Orange#F97316 | "Grade 3: Severe NPDR"| INDICATED        | prompt_refer  |
+| Grade 4 (Proliferative)  | Octagon [⯄] | Red   #EF4444 | "Grade 4: PDR"        | INDICATED        | urgent_refer  |
+| Model Uncertainty Gate   | Shield  [🛡] | Violet#8B5CF6 | "High Uncertainty"    | NOT_DETERMINED   | urgent_review |
+| Image Quality Rejection  | Warning [⚠] | Red   #DC2626 | "Recapture Required"  | NOT_ASSESSED     | recapture_req |
+| Model Unavailable State  | Pause   [⏸] | Yellow#EAB308 | "Manual Review"       | NOT_ASSESSED     | manual_review |
++--------------------------+-------------+---------------+-----------------------+------------------+---------------+
 ```
 
 ---
