@@ -1,137 +1,130 @@
-# EYERIS — Reusable Component Specifications & Architecture
+# EYERIS — Reusable Component Specifications & Architecture (Revision 1)
 **Subsystem**: UI/UX Component Engineering  
 **Role**: Senior Product Designer & Design Systems Engineer (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
-**Date**: November 2026  
-**Status**: Proposal for Design Approval Gate  
+**Date**: November 16, 2026  
+**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
 
 ---
 
-## 1. Component Specification Framework
+## 1. Member 4 Approved Design Decisions
 
-Every component in the EYERIS frontend follows a strict specification structure:
-1. **Component Name & Location**: Path within `frontend/src/components/`.
-2. **Reference Source & Observed Pattern**: Real-world commercial/clinical benchmark.
-3. **EYERIS Adaptation & Justification**: How and why it was modified for retinal screening.
-4. **Visual & Interaction States**: Default, Hover, Active, Focus, Disabled, Error, Loading.
-5. **Accessibility Contract**: ARIA roles, keyboard interactions, contrast ratios.
-6. **Implementation Priority**: Critical (Phase 1/2) vs Deferred (Phase 4).
-
----
-
-## 2. Core Navigation & Layout Components
-
-### 2.1 Global Patient Context Header (`Navbar.jsx`)
-- **Reference**: NHS Digital Service Manual & Epic Hyperspace patient banner.
-- **Observed Pattern**: Persistent top-bar displaying patient identifier, examination timestamp, and system status across all nested views.
-- **EYERIS Adaptation**: Streamlined dark bar (`#090D16`) with active Case ID, connection health dot, active persona mode (Operator vs. Specialist), and user profile.
-- **Implementation Priority**: **Critical (Already Foundationally Implemented)**.
-
-### 2.2 Collapsible Sidebar (`Sidebar.jsx`)
-- **Reference**: Linear Navigation & Vercel Dashboard.
-- **Observed Pattern**: Slim 240px left sidebar collapsible to 64px icon rail with keyboard toggle (`Cmd/Ctrl + B`).
-- **EYERIS Adaptation**: Dedicated navigation rail containing: Dashboard, New Screening, Screening History, System Status, and Settings. Includes keyboard accessibility navigation (`Tab` + `Enter`).
-- **Implementation Priority**: **High (Phase 2)**.
-
-### 2.3 Persistent Medical Disclaimer Banner (`DisclaimerBanner.jsx`)
-- **Reference**: FDA De Novo Medical Device Labeling & Google Health ARDA.
-- **Observed Pattern**: Mandatory visual notice identifying system as an investigational research decision-support tool.
-- **EYERIS Adaptation**: Unobtrusive amber-toned bar (`rgba(245, 158, 11, 0.12)`) placed directly below top navigation. Never occludes diagnostic viewports.
-- **Implementation Priority**: **Critical (Already Implemented)**.
+This revised component architecture integrates the following governance rules:
+1. **Primary Showcase Component**: Elevates the **Dual-Pane Retinal Image Viewer (`DualImageViewer.jsx`)** as the primary interactive and technical centerpiece.
+2. **Anatomical Visibility Guarantee**: Ensures raw preprocessed fundus images remain accessible regardless of active overlays via continuous opacity control ($0–100\%$), side-by-side viewports, and spacebar raw reveal.
+3. **Causality Guardrail**: Explicitly annotates Grad-CAM components with a mandatory notice stating that activation maps indicate feature correlation density, not anatomical lesion causality.
+4. **Distinct Component States**: Provides dedicated, decoupled UI components for:
+   - *State A: Model Unavailability* (`ModelOfflineAlert.jsx`)
+   - *State B: Image Quality Failure* (`QualityWarningModal.jsx`)
+   - *State C: High Model Uncertainty* (`UncertaintyAlertBadge.jsx`)
+   - *State D: Clinical Referral Guidance* (`ReferralBanner.jsx`)
+5. **Multi-Channel Accessibility**: Color is never used alone (WCAG 1.4.1); every clinical severity component combines an icon shape, a text label, and a numeric grade.
+6. **Provisional Engineering Values**: Quality threshold 0.60 and uncertainty threshold 0.35 are documented as configurable parameters, not certified clinical standards.
+7. **Role-Aware Presentation**: Operator Mode and Specialist Mode toggles adapt component density and layout without modifying the underlying decision engine.
 
 ---
 
-## 3. Retinal Image Viewer Architecture (`DualImageViewer.jsx`)
+## 2. Retinal Image Viewer Architecture (`DualImageViewer.jsx`) — PRIMARY TECHNICAL SHOWCASE
 
-### 3.1 Anatomical Viewport Architecture
+### 2.1 Viewport Wireframe & Layout Geometry
 ```
 +---------------------------------------------------------------------------------------------------------+
 | [Viewport Toolbar: Height 42px]                                                                         |
-| Layer: [ (•) Grad-CAM Heatmap  ( ) Lesion Masks  ( ) Raw Fundus ]                                       |
-| Opacity: [----------●-----] 70% | Zoom: [ - ] 100% [ + ] | [ ⟲ Reset ] | [ ↔ Side-by-Side ]             |
+| Layer: [ (•) Grad-CAM Heatmap   ( ) Lesion Masks   ( ) Raw Fundus ]                                     |
+| Opacity: [----------●-----] [Ex: 70%] | Zoom: [ - ] [Ex: 100%] [ + ] | [ ⟲ Reset ] | [ ↔ Side-by-Side ]  |
 +---------------------------------------------------+-----------------------------------------------------+
-| PANE A: Reference Fundus (Preprocessed True-Color)| PANE B: AI Explainability Layer                     |
+| PANE A: True-Color Fundus Reference               | PANE B: AI Explainability Layer                     |
 |                                                   |                                                     |
 |                                                   |                                                     |
-|             True-Color Fundus                     |             Grad-CAM Attention Heatmap              |
+|             True-Color Preprocessed Fundus        |             Grad-CAM Attention Heatmap              |
 |             (Macula & Optic Disc)                 |             (Class 4 / Neovascularization)          |
 |                                                   |             Overlaid with 70% Opacity               |
 |                                                   |                                                     |
 |                                                   |                                                     |
 +---------------------------------------------------+-----------------------------------------------------+
-| (Press-and-Hold Spacebar to momentarily reveal raw fundus photograph on Pane B)                         |
+| [Notice: Grad-CAM heatmaps visualize feature activation density and do not establish anatomical causality]|
+| (Press-and-Hold Spacebar to momentarily drop Pane B opacity to 0% and reveal raw fundus photograph)     |
 +---------------------------------------------------------------------------------------------------------+
 ```
 
-### 3.2 Viewport Feature Prioritization Matrix
+### 2.2 Viewport Feature Prioritization Matrix
 
-| Feature | Description | Implementation Priority | Technical Rationale |
+| Viewport Capability | Architectural Description | Priority | Clinical & Technical Justification |
 | :--- | :--- | :---: | :--- |
-| **Grad-CAM Opacity Slider** | HTML5 range slider ($0\% - 100\%$) controlling canvas alpha | **Critical (First Release)** | Eliminates diagnostic occlusion; allows clinician to verify underlying anatomy. |
-| **Press-and-Hold Compare** | Holding Spacebar drops overlay opacity to 0% | **Critical (First Release)** | Enables instant visual flicker-comparison between AI map and real vessels. |
-| **Synchronized Pan/Zoom** | Panning/zooming either pane updates both canvases | **High (Phase 2)** | Maintains exact anatomical cross-referencing between panes. |
-| **Lesion Mask Toggles** | Independent checkboxes for exudates, hemorrhages, MAs | **High (Phase 2/3)** | Enables multi-task verification of segmentation outputs. |
-| **Window/Level Contrast** | Radiologist-style contrast curve adjustments | **Deferred (Post-MVP)** | Not required for initial SIH prototype demonstration. |
-| **Measurement Calipers** | Digital ruler measuring lesion millimeter diameter | **Deferred (Post-MVP)** | Requires physical camera sensor pixel calibration. |
+| **Grad-CAM Opacity Slider** | HTML5 range input ($0\% - 100\%$) controlling overlay canvas alpha | **Critical (First Release)** | Eliminates visual occlusion; allows clinicians to verify whether heatmaps align with true vascular lesions. |
+| **Press-and-Hold Spacebar** | Keydown event listener temporarily dropping overlay alpha to 0% | **Critical (First Release)** | Enables instant visual flicker-comparison between the AI heatmap and the raw anatomical image. |
+| **Synchronized Pan & Zoom** | Bi-directional canvas matrix transform linking Pane A and Pane B | **High (Phase 2)** | Guarantees exact anatomical cross-referencing during deep lesion inspection. |
+| **Multi-Lesion Mask Toggles**| Independent checkboxes for exudates, hemorrhages, and microaneurysms | **High (Phase 2/3)** | Allows clinicians to isolate specific lesion classes without visual clutter. |
+| **Window/Level Contrast** | Radiologist-style contrast curve adjustments | **Deferred (Post-MVP)** | Not essential for initial prototype screening demonstration. |
+| **Measurement Calipers** | Digital millimeter lesion measurement calipers | **Deferred (Post-MVP)** | Requires physical camera sensor calibration parameters. |
 
 ---
 
-## 4. Diagnostic & Telemetry Display Components
+## 3. Decoupled Clinical & System State Components
 
-### 4.1 ICDR 5-Grade Severity Card (`DRGradeCard.jsx`)
-- **Reference**: Thirona RetCAD & International Clinical DR Disease Severity Scale.
-- **Observed Pattern**: Visual progression bar indicating severity tier from 0 (No DR) to 4 (Proliferative).
-- **EYERIS Adaptation**: 5-segment horizontal segmented track with distinct color bands and active indicator caret. Displays grade number, formal ICDR label, and expandable softmax probability distribution.
-- **States**:
-  - *Normal / Grade 0*: Emerald Green (`#10B981`)
-  - *Mild / Grade 1*: Cyan (`#06B6D4`)
-  - *Moderate / Grade 2*: Warm Amber (`#F59E0B`)
-  - *Severe / Grade 3*: Vibrant Orange (`#F97316`)
-  - *Proliferative / Grade 4*: Crimson Red (`#EF4444`)
-  - *Model Unavailable*: Muted Slate with `"Clinical Review Required"` badge.
+```
++---------------------------------------------------------------------------------------------------------+
+|                                    DECOUPLED ARCHITECTURAL STATE MATRIX                                 |
++--------------------------+-----------------------+------------------------+-----------------------------+
+| STATE A: MODEL OFFLINE   | STATE B: QUALITY FAIL | STATE C: HIGH UNCERTAIN| STATE D: CLINICAL REFERRAL  |
++--------------------------+-----------------------+------------------------+-----------------------------+
+| • Model weights pending  | • Quality score < 0.60| • Uncertainty > 0.35   | • ICDR Grade 2, 3, or 4     |
+| • Referral: FALSE        | • Referral: FALSE     | • Referral: TRUE       | • Referral: TRUE            |
+| • Review Required: TRUE  | • Grading Halted      | • Urgency: Urgent Rev  | • Tiered Clinical Timeframe |
+| • Urgency: Manual Review | • Urgency: Recapture  | • Specialist Arbitrate | • Routine / Prompt / Urgent |
++--------------------------+-----------------------+------------------------+-----------------------------+
+```
 
-### 4.2 Calibrated Confidence & Uncertainty Gauge (`ConfidenceGauge.jsx`)
-- **Reference**: IBM Carbon Healthcare & Academic Uncertainty Quantification Standards.
-- **Observed Pattern**: Precision progress bar showing calibrated probability alongside an epistemic uncertainty interval.
-- **EYERIS Adaptation**: Dual-metric meter displaying temperature-scaled confidence ($0\% - 100\%$) and an explicit violet uncertainty band. Automatically flags cases exceeding uncertainty threshold ($>0.35$) with an "Escalate for Specialist Confirmation" badge.
+### 3.1 State A: Model Unavailability Component (`ModelOfflineAlert.jsx`)
+- **Trigger**: Real model weights missing (`ai_models/classifier/weights/` unharvested).
+- **Presentation**: Amber status badge `[⏸] Manual Review Required` + Information Card: *"Automated classification model is currently offline. Case queued for manual ophthalmologist grading. No referral decision generated."*
+- **Clinical Safety Rule**: Prevents unassessed cases from polluting hospital referral queues.
 
-### 4.3 Clinical Referral Banner (`ReferralBanner.jsx`)
-- **Reference**: EyeArt & NHS Diabetic Eye Screening Programme (DESP).
-- **Observed Pattern**: Explicit actionable referral recommendations with clinical urgency timeframes.
-- **EYERIS Adaptation**: Color-coded alert banner with 5 distinct operational urgency tiers:
-  1. `URGENT REFERRAL (1–2 Weeks)`: Proliferative DR (Grade 4). High risk of vitreous hemorrhage or tractional retinal detachment.
-  2. `PROMPT REFERRAL (2–4 Weeks)`: Severe NPDR (Grade 3). High risk of progression.
-  3. `ROUTINE REFERRAL (4–8 Weeks)`: Moderate NPDR (Grade 2). Referable DR.
-  4. `ROUTINE ANNUAL SCREENING`: Mild (Grade 1) or Normal (Grade 0). Rescreen in 12 months.
-  5. `MANDATORY RECAPTURE`: Ungradable image (Quality $<0.60$). Retake scan immediately.
+### 3.2 State B: Image Quality Failure Modal (`QualityWarningModal.jsx`)
+- **Trigger**: `overall_quality_score < 0.60` (provisional engineering threshold) or `is_gradable == False`.
+- **Presentation**: High-contrast amber modal `[⚠] Image Quality Insufficient for Automated Grading`.
+- **Content**: Specific defect breakdown (e.g. *"Severe corneal reflection / optical blur"*) + Action button: `[ Recapture Retinal Photograph ]`.
+- **Clinical Safety Rule**: Halts automated classification to prevent ungradable scans from generating false reassurance.
+
+### 3.3 State C: Model Uncertainty Alert (`UncertaintyAlertBadge.jsx`)
+- **Trigger**: Epistemic uncertainty score $>0.35$ (provisional engineering threshold) or `is_uncertain == True`.
+- **Presentation**: Violet badge `[🛡] High Model Uncertainty Detected`.
+- **Content**: Telemetry card displaying temperature-calibrated probability alongside an explicit uncertainty margin.
+- **Clinical Safety Rule**: Flags borderline or ambiguous cases for specialist human confirmation.
+
+### 3.4 State D: Clinical Referral Banner (`ReferralBanner.jsx`)
+- **Trigger**: Verified ICDR Grade $\ge 2$ with adequate image quality.
+- **Presentation**: Tiered referral card:
+  - *Grade 4 (PDR)*: Crimson `[⯄] URGENT SPECIALIST REFERRAL (1–2 Weeks)` — High risk of severe vision loss.
+  - *Grade 3 (Severe NPDR)*: Orange `[▲] PROMPT OPHTHALMOLOGY REFERRAL (2–4 Weeks)`.
+  - *Grade 2 (Moderate NPDR)*: Amber `[◆] ROUTINE CLINICAL REFERRAL (4–8 Weeks)`.
+  - *Grade 0 / 1 (Normal / Mild)*: Emerald `[●] ROUTINE ANNUAL SCREENING`.
 
 ---
 
-## 5. Form & Intake Components
+## 4. Role-Aware Presentation Modes (Operator vs. Specialist)
+
+Both modes consume the exact same underlying pipeline contract from `/api/v1/screenings`:
+
+```mermaid
+graph TD
+    API[FastAPI /api/v1/screenings Contract] --> Payload[Unified Screening Result Payload]
+    Payload --> ModeSwitch{Role-Aware Presentation Switcher}
+    ModeSwitch -->|Operator Mode| OpView[Simplified Triage: Image Quality Card + Referral Banner + 2-Click Upload]
+    ModeSwitch -->|Specialist Mode| SpecView[Clinical Workspace: Dual-Pane Viewport + Opacity Slider + Probability Distribution]
+```
+
+- **Operator Presentation**: Optimized for rural community health nurses. Prioritizes rapid in-chair quality validation and straightforward referral instructions.
+- **Specialist Presentation**: Optimized for ophthalmologists. Unlocks synchronized viewports, Grad-CAM attention controls, lesion counts, and calibrated epistemic uncertainty.
+
+---
+
+## 5. Form & Dropzone Components
 
 ### 5.1 Retinal Image Dropzone (`ImageDropzone.jsx`)
-- **Reference**: Stripe File Upload & LumineticsCore In-Chair Intake.
-- **Observed Pattern**: Drag-and-drop area with immediate pre-validation feedback.
-- **EYERIS Adaptation**: Form factor with 220px drop target, retinal camera icon, drag-hover glow, format validation (`image/jpeg`, `image/png`), 15MB file size limit, and instant pre-upload preview.
+- **Drop Target**: 220px height, 2px dashed border (`--eyeris-border-strong`), radial camera vignette background.
+- **Pre-Upload Validation**: Checks MIME type (`image/jpeg`, `image/png`) and file size ($\le 15$ MB). Displays instant file thumbnail, pixel dimensions, and clear remove button prior to API submission.
 
 ### 5.2 Bilateral Eye Selector (`EyeSelector.jsx`)
-- **Reference**: Zeiss FORUM & Topcon Harmony PACS.
-- **Observed Pattern**: Segmented pill switch toggling between Right Eye (OD - *Oculus Dexter*) and Left Eye (OS - *Oculus Sinister*).
-- **EYERIS Adaptation**: High-contrast radio toggle matching standard ophthalmic charting conventions.
-
----
-
-## 6. Defensive System States (Empty, Loading, Error)
-
-### 6.1 Loading States (`SkeletonLoader.jsx`)
-- **Design Rule**: Never display a blank screen or jarring layout shifts.
-- **Implementation**: Muted pulse animation (`rgba(30, 41, 59, 0.5)`) mimicking the exact card geometries of the viewport, grade cards, and telemetry tables.
-
-### 6.2 Empty States (`EmptyState.jsx`)
-- **Design Rule**: Guide the user toward the next operational action.
-- **Implementation**: Centered illustration icon (e.g. retinal scanner silhouette), clear title (*"No Screenings Found"*), descriptive guidance (*"Upload a fundus photograph to initiate an automated screening"*), and primary action button (*"Start New Screening"*).
-
-### 6.3 Defensive Error Banners (`ErrorAlert.jsx`)
-- **Design Rule**: Provide specific clinical/system cause and concrete recovery steps.
-- **Implementation**: Left 4px border accent, warning icon, specific error message (e.g. *"FastAPI Backend Offline — Check localhost:8000"*), and a retry button.
-
+- **Interaction**: High-contrast segmented pill switch toggling between Right Eye (OD) and Left Eye (OS).
+- **Multi-Channel**: Combines standard ophthalmic abbreviations (`OD` / `OS`) with full Latin names (*Oculus Dexter* / *Oculus Sinister*) and distinct selected states.

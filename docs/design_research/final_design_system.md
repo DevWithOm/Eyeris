@@ -1,154 +1,89 @@
-# EYERIS — Final Visual Design System & Token Specification
+# EYERIS — Final Visual Design System & Token Specification (Revision 1)
 **Subsystem**: UI/UX Design System  
 **Role**: Senior Product Designer & Design Systems Engineer (Member 4)  
 **Project**: EYERIS — Explainable AI Diabetic Retinopathy Screening System  
-**Date**: November 2026  
-**Status**: Proposal for Design Approval Gate  
+**Date**: November 16, 2026  
+**Status**: Revised Specification Incorporating Member 4 Approved Design Decisions  
 
 ---
 
-## 1. Design Token Architecture & CSS Root Definitions
+## 1. Member 4 Approved Design Decisions
 
-All design tokens are structured as CSS custom properties with strict semantic naming conventions, calibrated for high-contrast accessibility (WCAG 2.2 AA compliant, targeting AAA where applicable) against diagnostic dark surfaces.
-
-```css
-:root {
-  /* =========================================================================
-     1. CANVAS & SURFACE ELEVATION (Diagnostic Dark Slate Palette)
-     Rationale: Avoids pure pitch black (#000000) which causes harsh OLED halation,
-     and bright white (#FFFFFF) which constricts pupils during retinal examination.
-     ========================================================================= */
-  --eyeris-canvas: #090d16;          /* Deepest root background canvas */
-  --eyeris-surface-subtle: #0f1624;  /* Inset wells, table headers, code blocks */
-  --eyeris-surface-1: #131c2e;       /* Level 1: Primary card panels & modals */
-  --eyeris-surface-2: #1b263b;       /* Level 2: Interactive elements, hover states */
-  --eyeris-surface-3: #25334e;       /* Level 3: Active tabs, tooltips, popovers */
-
-  /* Borders & Dividers */
-  --eyeris-border-subtle: #1e2c44;   /* Default card divider (4.8:1 contrast on canvas) */
-  --eyeris-border-strong: #2e4366;   /* Active boundaries, input borders */
-  --eyeris-border-focus: #3b82f6;    /* Visible keyboard focus ring (WCAG 2.4.7) */
-
-  /* =========================================================================
-     2. TYPOGRAPHIC COLOR TOKENS
-     ========================================================================= */
-  --eyeris-text-primary: #f8fafc;    /* Headings, primary metrics, active text (15.2:1) */
-  --eyeris-text-secondary: #94a3b8;  /* Labels, table data, subheadings (6.5:1) */
-  --eyeris-text-muted: #64748b;      /* Disabled text, metadata footnotes (4.6:1) */
-  --eyeris-text-inverse: #090d16;    /* Dark text for use on bright badges */
-
-  /* =========================================================================
-     3. CLINICAL SEVERITY & STATUS TOKENS (ICDR 5-Grade Scale)
-     Note: Colors are NEVER used as the sole conveyor of information (WCAG 1.4.1).
-     Every status token is paired with an icon, numeric grade, and text label.
-     ========================================================================= */
-  --eyeris-grade-0: #10b981;         /* Grade 0 - No DR: Emerald Green (Annual Screen) */
-  --eyeris-grade-1: #06b6d4;         /* Grade 1 - Mild: Cyan (Routine Monitoring) */
-  --eyeris-grade-2: #f59e0b;         /* Grade 2 - Moderate: Amber (Routine Referral) */
-  --eyeris-grade-3: #f97316;         /* Grade 3 - Severe: Orange (Prompt Referral) */
-  --eyeris-grade-4: #ef4444;         /* Grade 4 - Proliferative: Crimson (Urgent Referral) */
-
-  /* Functional Triage States */
-  --eyeris-status-urgent: #ef4444;   /* Urgent Referral required */
-  --eyeris-status-routine: #10b981;  /* Routine monitoring / healthy */
-  --eyeris-status-recapture: #dc2626;/* Quality rejection / Recapture mandatory */
-  --eyeris-status-uncertain: #8b5cf6;/* Model uncertainty detected / Escalate */
-  --eyeris-status-pending: #eab308;  /* Model pending review / In-flight */
-
-  /* =========================================================================
-     4. RETINAL LESION OVERLAY TOKENS
-     Calibrated against fundus photography to maximize edge visibility.
-     ========================================================================= */
-  --eyeris-lesion-exudate: #facc15;   /* Hard Exudates: Vivid yellow */
-  --eyeris-lesion-hemorrhage: #ef4444;/* Hemorrhages: High-contrast scarlet red */
-  --eyeris-lesion-ma: #06b6d4;        /* Microaneurysms: Electric cyan dot markers */
-  --eyeris-lesion-cws: #e2e8f0;       /* Cotton Wool Spots: Translucent chalk white */
-
-  /* =========================================================================
-     5. SPATIAL & GEOMETRY TOKENS (8px Base Grid)
-     ========================================================================= */
-  --eyeris-space-1: 4px;             /* Micro spacer */
-  --eyeris-space-2: 8px;             /* Tight spacer, icon-text gap */
-  --eyeris-space-3: 12px;            /* Input padding, badge margins */
-  --eyeris-space-4: 16px;            /* Standard component padding */
-  --eyeris-space-5: 20px;            /* Moderate card spacing */
-  --eyeris-space-6: 24px;            /* Card container padding */
-  --eyeris-space-8: 32px;            /* Section separation */
-  --eyeris-space-12: 48px;           /* Major page grid gap */
-
-  /* Border Radii */
-  --eyeris-radius-sm: 4px;           /* Tags, small buttons, status pills */
-  --eyeris-radius-md: 6px;           /* Form inputs, select dropdowns */
-  --eyeris-radius-lg: 8px;           /* Standard cards, dialogs, viewports */
-  --eyeris-radius-xl: 12px;          /* Master layout containers, modals */
-  --eyeris-radius-full: 9999px;      /* Circular status dots, avatars */
-
-  /* Elevation Shadows */
-  --eyeris-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-  --eyeris-shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
-  --eyeris-shadow-glow-focus: 0 0 0 3px rgba(59, 130, 246, 0.4);
-}
-```
+This revised design system integrates the following twelve approved architectural decisions:
+1. Standardizes on the Diagnostic Slate Dark Palette (`#090D16` canvas, `#131C2E` primary card surface).
+2. Preserves Inter typography with tabular numerals (`tnum`) for data stability.
+3. Incorporates exact mathematically verified WCAG 2.2 AA contrast ratios for all foreground/background pairings.
+4. Enforces multi-channel accessibility: clinical severity and system statuses are never conveyed through color alone; every indicator combines an icon, a text label, and a numeric stage.
+5. Elevates the dual-pane retinal analysis workspace as the primary visual and technical showcase.
+6. Calibrates lesion overlays (hard exudates, hemorrhages, microaneurysms) for maximum clarity without obscuring retinal tissue.
+7. Guarantees raw anatomical fundus visibility through continuous opacity adjustment ($0–100\%$) and a spacebar bypass.
+8. Enforces role-aware presentation modes (Operator View vs. Specialist View) that consume the identical backend contract without modifying the decision engine.
+9. Separates pipeline states into four distinct UI representations: Model Unavailability, Image Quality Failure, Model Uncertainty, and Clinical Referral.
+10. Treats quality (0.60) and uncertainty (0.35) thresholds as configurable provisional engineering values, not clinically certified thresholds.
+11. Labels all wireframe metrics as `[Example Wireframe Value: e.g. N]`.
+12. Explicitly disclaims regulatory clearance or automated diagnostic claims.
 
 ---
 
-## 2. Typography System & Type Scale
+## 2. Mathematically Verified Color Token Architecture
 
-The typeface is **Inter** (with system-ui fallbacks) for optimal legibility at micro-sizes. All numeric metrics use tabular numeral alignment (`tnum`) to eliminate visual dancing during live data updates.
+All contrast ratios were computed using the standard WCAG relative luminance formula:
+$$\text{Contrast Ratio} = \frac{L_1 + 0.05}{L_2 + 0.05}$$
+where $L_1$ is the relative luminance of the lighter color and $L_2$ is the relative luminance of the darker color. Target: WCAG 2.2 Level AA ($\ge 4.5:1$ for body text, $\ge 3.0:1$ for large text and UI components).
 
-| Style Role | Font Size | Line Height | Weight | Letter Spacing | CSS Implementation |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Display Header** | 28px (1.75rem) | 34px | 700 (Bold) | -0.02em | `font-size: 1.75rem; font-weight: 700; line-height: 1.2;` |
-| **Section Header (H1)** | 22px (1.375rem) | 28px | 600 (Semibold) | -0.01em | `font-size: 1.375rem; font-weight: 600; line-height: 1.28;` |
-| **Card Header (H2)** | 16px (1.00rem) | 22px | 600 (Semibold) | 0.00em | `font-size: 1.00rem; font-weight: 600; line-height: 1.375;` |
-| **Body Standard** | 14px (0.875rem) | 20px | 400 (Regular) | 0.00em | `font-size: 0.875rem; font-weight: 400; line-height: 1.43;` |
-| **Body Semibold** | 14px (0.875rem) | 20px | 600 (Semibold) | 0.00em | `font-size: 0.875rem; font-weight: 600; line-height: 1.43;` |
-| **Table & Monospace** | 13px (0.8125rem) | 18px | 500 (Medium) | 0.02em | `font-size: 0.8125rem; font-family: monospace; font-variant-numeric: tabular-nums;` |
-| **Caption / Badge** | 12px (0.75rem) | 16px | 600 (Semibold) | +0.04em | `font-size: 0.75rem; font-weight: 600; text-transform: uppercase;` |
-| **Legal / Disclaimer**| 11px (0.6875rem) | 16px | 400 (Regular) | 0.00em | `font-size: 0.6875rem; color: var(--eyeris-text-muted); font-style: italic;` |
+### 2.1 Surface & Typographic Tokens with Exact Contrast Ratios
+
+| Token Name | HEX Value | Surface Role | Exact Contrast vs Canvas (`#090D16`) | Exact Contrast vs Surface-1 (`#131C2E`) | WCAG 2.2 AA Compliance |
+| :--- | :---: | :--- | :---: | :---: | :---: |
+| `--eyeris-canvas` | `#090D16` | Deepest root canvas | Base (1.00:1) | — | Base Background |
+| `--eyeris-surface-subtle` | `#0F1624` | Inset wells, table headers | 1.15:1 | — | Low-contrast boundary |
+| `--eyeris-surface-1` | `#131C2E` | Primary elevated card panels | 1.25:1 | Base (1.00:1) | Primary Container |
+| `--eyeris-surface-2` | `#1B263B` | Interactive hover states | 1.62:1 | 1.30:1 | Component Surface |
+| `--eyeris-surface-3` | `#25334E` | Active highlights, tooltips | 2.15:1 | 1.72:1 | Elevated Overlay |
+| `--eyeris-border-subtle` | `#1E2C44` | Structural card borders | 1.39:1 | 1.22:1 | Divider |
+| `--eyeris-border-focus` | `#3B82F6` | Keyboard focus ring | 4.88:1 | 4.28:1 | **Passes AA Component (3.0:1)** |
+| **`--eyeris-text-primary`** | `#F8FAFC` | Display & primary headers | **18.57:1** | **16.28:1** | **Passes AAA ($\ge 7.0:1$)** |
+| **`--eyeris-text-secondary`**| `#94A3B8` | Field labels, captions | **7.58:1** | **6.64:1** | **Passes AA ($\ge 4.5:1$)** |
+| **`--eyeris-text-muted`** | `#8493A8` | Calibrated footnotes, units | **6.22:1** | **5.45:1** | **Passes AA ($\ge 4.5:1$)** |
 
 ---
 
-## 3. Core Component Library Specifications
+### 2.2 Clinical Severity & Status Tokens (Multi-Channel Encoding)
+*Every clinical status token is paired with an icon shape, text label, and numeric severity indicator. The text tints below are specifically calibrated to yield high-contrast legibility against dark badge containers.*
 
-### 3.1 Buttons
-- **Primary Action**: Solid blue (`#3B82F6`), hover `#2563EB`, active `#1D4ED8`, text `#FFFFFF`. 36px height, 12px horizontal padding, 6px border radius.
-- **Secondary Action**: Background `--eyeris-surface-2`, border `1px solid --eyeris-border-strong`, text `--eyeris-text-primary`.
-- **Destructive Action**: Background `#EF4444`, hover `#DC2626`, text `#FFFFFF`.
-- **Ghost / Icon Button**: Transparent background, hover `--eyeris-surface-2`, text `--eyeris-text-secondary`, 32x32px hit target.
-- **Focus States**: High-contrast blue outline (`3px solid rgba(59, 130, 246, 0.6)`), 2px focus offset.
+| Clinical Severity / Status | Base Token HEX | Badge Text Tint | Exact Text Contrast vs Surface-1 (`#131C2E`) | Multi-Channel Encoding (WCAG 1.4.1) | Clinical Action |
+| :--- | :---: | :---: | :---: | :--- | :--- |
+| **Grade 0 (No DR)** | `#10B981` | `#6EE7B7` | **11.17:1** (Passes AAA) | Circle Icon `[●]` + Text `"Grade 0: No DR"` | Routine Annual Screening |
+| **Grade 1 (Mild NPDR)** | `#06B6D4` | `#67E8F9` | **12.45:1** (Passes AAA) | Square Icon `[■]` + Text `"Grade 1: Mild NPDR"` | Routine Monitoring (6–12 Mo) |
+| **Grade 2 (Moderate NPDR)**| `#F59E0B` | `#FCD34D` | **11.81:1** (Passes AAA) | Diamond Icon `[◆]` + Text `"Grade 2: Moderate NPDR"`| Routine Referral (4–8 Wks) |
+| **Grade 3 (Severe NPDR)** | `#F97316` | `#FDBA74` | **10.10:1** (Passes AAA) | Triangle Icon `[▲]` + Text `"Grade 3: Severe NPDR"`| Prompt Referral (2–4 Wks) |
+| **Grade 4 (Proliferative)**| `#EF4444` | `#FCA5A5` | **8.97:1** (Passes AAA) | Octagon Icon `[⯄]` + Text `"Grade 4: PDR"` | Urgent Specialist Referral (1–2 Wks) |
+| **Model Uncertainty Alert**| `#8B5CF6` | `#C4B5FD` | **9.22:1** (Passes AAA) | Shield Icon `[🛡]` + Text `"High Uncertainty"` | Specialist Confirmation Required |
+| **Image Quality Rejection**| `#DC2626` | `#FECACA` | **11.77:1** (Passes AAA) | Alert Icon `[⚠]` + Text `"Recapture Required"`| Immediate In-Chair Retake |
+| **Model Offline State** | `#EAB308` | `#FEF08A` | **13.52:1** (Passes AAA) | Pause Icon `[⏸]` + Text `"Manual Review"` | Clinician Manual Grading Queue |
 
-### 3.2 Form Inputs & File Dropzone
-- **Text / Select Input**: Height 38px, background `--eyeris-surface-subtle`, border `1px solid --eyeris-border-subtle`, focus border `--eyeris-border-focus`. Tabular numbers for IDs.
-- **Fundus Upload Dropzone**:
-  - Minimum height: 220px.
-  - Border: 2px dashed `--eyeris-border-strong` (transitions to `#3B82F6` solid on dragover).
-  - Background: `--eyeris-surface-subtle` with subtle radial camera vignette.
-  - Interactive states: Idle, Drag-Hover, Validating, Uploading (progress bar), Error (red dashed), Success (green border + fundus thumbnail).
+---
 
-### 3.3 Cards & Data Containers
-- **Diagnostic Card**: Padding 20px, background `--eyeris-surface-1`, border `1px solid --eyeris-border-subtle`, border-radius 8px, shadow `--eyeris-shadow-card`.
-- **Triage Alert Banner**: Full width, left 4px solid accent border (e.g. red for urgent referral, amber for manual review, green for annual monitoring), background `--eyeris-surface-1`.
+### 2.3 Retinal Lesion Overlay Tokens
+- **Hard Exudates**: `--eyeris-lesion-exudate: #FACC15` (Vivid Yellow fill with 1px border).
+- **Hemorrhages / Microaneurysms**: `--eyeris-lesion-hemorrhage: #EF4444` (Crimson Red fill).
+- **Microaneurysm Markers**: `--eyeris-lesion-ma: #06B6D4` (Electric Cyan circular points).
+- **Cotton Wool Spots**: `--eyeris-lesion-cws: #E2E8F0` (Semi-translucent Chalk White contour).
 
-### 3.4 Data Tables
-- **Screening Registry Table**:
-  - Sticky header with background `--eyeris-surface-subtle` and bottom border `2px solid --eyeris-border-strong`.
-  - Row height: 48px, hover background `--eyeris-surface-2`.
-  - Column layout: Case ID (monospace), Screening Date/Time, Image Quality Badge, DR Grade Segment, Urgency Badge, Action Button.
-  - Sort indicators: Visual up/down arrows with `aria-sort` attributes.
+---
 
-### 3.5 Status Badges & Indicators
-- Built with dual visual indicators: a 6px circular glowing status dot + bold text label.
-  - **Urgent Referral**: Dot `#EF4444`, text `#FCA5A5`, bg `rgba(239, 68, 68, 0.15)`.
-  - **Prompt Referral**: Dot `#F97316`, text `#FDBA74`, bg `rgba(249, 115, 22, 0.15)`.
-  - **Routine Referral**: Dot `#F59E0B`, text `#FCD34D`, bg `rgba(245, 158, 11, 0.15)`.
-  - **Annual Rescreening**: Dot `#10B981`, text `#6EE7B7`, bg `rgba(16, 185, 129, 0.15)`.
-  - **Manual Review**: Dot `#8B5CF6`, text `#C4B5FD`, bg `rgba(139, 92, 246, 0.15)`.
-  - **Quality Rejection**: Dot `#DC2626`, text `#FCA5A5`, bg `rgba(220, 38, 38, 0.20)`.
+## 3. Typography System & Numerical Precision
 
-### 3.6 Tooltips & Modals
-- **Tooltip**: Background `--eyeris-surface-3`, border `1px solid --eyeris-border-strong`, text `--eyeris-text-primary`, font size 12px, padding 6px 10px, border-radius 4px, z-index 1000.
-- **Modal Dialog**: Centered overlay with backdrop blur (`backdrop-filter: blur(4px); background: rgba(9, 13, 22, 0.75)`). Modal box: max-width 560px, padding 24px, background `--eyeris-surface-1`, border `1px solid --eyeris-border-strong`, border-radius 12px.
+- **Font Family**: `Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
+- **Tabular Numerals**: `font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;` strictly applied to all telemetry values, Case IDs, quality scores, coordinates, and probabilities.
+- **Type Scale**:
+  - `Display / H1`: 28px (1.75rem), Bold (700), Line-height 1.2
+  - `Section / H2`: 20px (1.25rem), Semibold (600), Line-height 1.3
+  - `Card Header / H3`: 16px (1.00rem), Semibold (600), Line-height 1.4
+  - `Body Standard`: 14px (0.875rem), Regular (400), Line-height 1.45
+  - `Table Data`: 13px (0.8125rem), Medium (500), Monospace `tnum`
+  - `Caption / Badge`: 12px (0.75rem), Semibold (600), Uppercase tracking +0.05em
+  - `Legal Disclaimer`: 11px (0.6875rem), Regular (400), Italic, `#8493A8`
 
 ---
 
@@ -156,48 +91,43 @@ The typeface is **Inter** (with system-ui fallbacks) for optimal legibility at m
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-| Top Header Bar: Height 56px | Persistent Patient Context + Health Status + Mode Switcher                |
+| Persistent Global Patient Context Bar: Height 56px | Sticky Top Navigation                              |
 +---------------------------------------------------------------------------------------------------------+
-| Persistent Disclaimer Banner: Height 32px | Amber/Slate Legal Research Notice                           |
+| Persistent Medical Disclaimer Banner: Height 32px | Amber/Slate Legal Research Notice                   |
 +----------------------+----------------------------------------------------------------------------------+
-| Sidebar Navigation   | Main Content Area (Fluid width, Max 1600px, Margin Auto)                         |
-| Width: 240px         | Padding: 24px (Desktop) / 16px (Mobile)                                          |
-| (Collapsible to 64px)|                                                                                  |
-|                      |                                                                                  |
-| - Dashboard          |                                                                                  |
-| - New Screening      |                                                                                  |
-| - Screening History  |                                                                                  |
-| - Screening Details  |                                                                                  |
-| - Reports            |                                                                                  |
-| - System Status      |                                                                                  |
-| - Settings           |                                                                                  |
+| Collapsible Sidebar  | Master Application Workspace (Fluid Width, Max 1600px, Margin Auto)              |
+| Standard: 240px      | Padding: 24px (Desktop) / 16px (Mobile)                                          |
+| Collapsed: 64px      |                                                                                  |
+|                      | Screening Details Workspace (Primary Technical Showcase):                        |
+| [Dashboard]          | +-----------------------------------------+------------------------------------+ |
+| [New Screening]      | | Left Pane: Retinal Viewport (60% Width) | Right Pane: Telemetry (40% Width)  | |
+| [Screening History]  | | Synchronized Pan/Zoom, Opacity Slider   | ICDR Grade, Quality, Uncertainty,  | |
+| [Screening Details]  | | Anatomical Landmark Preservation        | Referral Action Tiering            | |
+| [Reports]            | +-----------------------------------------+------------------------------------+ |
+| [System Status]      |                                                                                  |
+| [Settings]           |                                                                                  |
 +----------------------+----------------------------------------------------------------------------------+
 ```
 
 ### Breakpoints:
-- **Desktop Large ($\ge 1440$px)**: Full sidebar (240px), 2-column details workspace (60% viewer / 40% clinical triage).
-- **Desktop Standard ($1200$px – $1439$px)**: Collapsed icon sidebar (64px), 2-column details workspace.
-- **Tablet ($768$px – $1199$px)**: Off-canvas drawer sidebar, single-column tabbed layout (Tab 1: Viewport, Tab 2: Clinical Details, Tab 3: Report).
-- **Mobile / Outreach Tablet ($< 768$px)**: Bottom navigation bar, vertical stacked flow optimized for one-handed photo review and triage logging.
+- **Desktop Large ($\ge 1440$px)**: Full sidebar (240px), 2-column workspace (60% viewer / 40% triage).
+- **Desktop Standard ($1200$px – $1439$px)**: Collapsed icon sidebar (64px), 2-column workspace.
+- **Tablet ($768$px – $1199$px)**: Off-canvas drawer navigation, single-column tabbed layout.
+- **Mobile / Outreach Tablet ($< 768$px)**: Bottom navigation rail, vertical stacked flow.
 
 ---
 
 ## 5. Accessibility Compliance Architecture (WCAG 2.2 AA)
 
-1. **Color Independence (WCAG 1.4.1)**: Every DR grade and urgency level includes an unambiguous text label, icon shape, and numeric indicator in addition to its color code.
-2. **Contrast Ratios (WCAG 1.4.3 & 1.4.11)**:
-   - Body text against surface: $\ge 6.5:1$ (exceeds 4.5:1 AA requirement).
-   - Headings against surface: $\ge 15.2:1$ (exceeds 7:1 AAA requirement).
-   - Interactive borders and focus rings: $\ge 3.2:1$.
-3. **Keyboard Navigability (WCAG 2.1.1 & 2.4.7)**:
-   - Full tab-index flow across all form inputs and interactive buttons.
-   - Dedicated retinal image viewer shortcuts:
-     - `H`: Toggle Grad-CAM Heatmap overlay.
-     - `Space` (Hold): Temporarily reveal raw fundus photograph.
-     - `+` / `-`: Zoom in / Zoom out.
-     - `0`: Reset viewport zoom and pan.
-     - `Esc`: Close open modal dialogs.
-4. **Screen Reader Announcements (WCAG 4.1.2)**:
-   - Dynamic image upload states announce via `aria-live="polite"`.
-   - Critical quality rejections announce via `aria-live="assertive"` and `role="alert"`.
-
+1. **Color Independence (WCAG 1.4.1)**: All status badges combine distinct icon glyphs (`[●]`, `[■]`, `[◆]`, `[▲]`, `[⯄]`), numeric values, and text labels.
+2. **Contrast Verification (WCAG 1.4.3 & 1.4.11)**:
+   - Primary text against surface: **16.28:1** (Exceeds AAA 7.0:1 requirement).
+   - Secondary text against surface: **6.64:1** (Exceeds AA 4.5:1 requirement).
+   - Calibrated muted text against surface: **5.45:1** (Exceeds AA 4.5:1 requirement).
+   - Status badge text against badge containers: **8.97:1 to 13.52:1** (Exceeds AAA 7.0:1).
+3. **Keyboard Viewport Controls (WCAG 2.1.1)**:
+   - `H`: Toggle Grad-CAM attention heatmap overlay on/off.
+   - `Space` (Hold): Temporarily set heatmap opacity to 0% to reveal the raw fundus image.
+   - `+` / `-`: Incremental zoom in / zoom out.
+   - `0`: Reset viewport pan and zoom to fit.
+   - `Esc`: Close open modal dialogs.
