@@ -35,6 +35,9 @@ storage/processed/*
 *.zip
 *.tar.gz
 *.tar
+storage/cases/*
+storage/*.db
+*.db
 
 # Generated artifacts and outputs
 artifacts/model_weights/*
