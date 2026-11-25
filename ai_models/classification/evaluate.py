@@ -137,57 +137,87 @@ def compute_classification_metrics(
     y_pred: Union[torch.Tensor, np.ndarray, List],
     y_probs: Optional[Union[torch.Tensor, np.ndarray, List]] = None,
     class_names: Optional[Dict[int, str]] = None,
-    referable_threshold: int = 2,
+    referable_threshold: int = 2
 ) -> Dict[str, Any]:
     """
     Computes comprehensive multiclass and clinical referable metrics adhering to docs/evaluation_protocol.md.
+
+    Args:
+        y_true: Ground-truth integer labels [N] (0 to 4).
+        y_pred: Model predicted integer labels [N] (0 to 4).
+        y_probs: Optional predicted probabilities [N, 5].
+        class_names: Optional mapping of class indices to human-readable strings.
+        referable_threshold: Grade threshold for Referable DR (default: 2, meaning Grades 2-4 are Referable).
+
+    Returns:
+        Structured evaluation dictionary containing:
+            - overall_accuracy, macro_precision, macro_recall, macro_f1, weighted_f1
+            - quadratic_weighted_kappa
+            - confusion_matrix_5class (always 5x5 list of lists)
+            - per_class: per-grade precision, recall, f1, support
+            - referable_dr: clinical binary metrics (sensitivity, specificity, PPV, NPV, accuracy)
+            - evaluation_metadata
     """
+    if class_names is None:
+        class_names = DR_GRADE_LABELS
+
     true_np, pred_np = validate_evaluation_inputs(y_true, y_pred, num_classes=EYERIS_NUM_CLASSES)
     n_samples = len(true_np)
 
-    names = class_names or DR_GRADE_LABELS
-
-    # Multiclass Metrics
+    # 1. Multiclass Overall Metrics
     acc = float(accuracy_score(true_np, pred_np))
     macro_prec = float(precision_score(true_np, pred_np, average="macro", zero_division=0))
     macro_rec = float(recall_score(true_np, pred_np, average="macro", zero_division=0))
     macro_f1 = float(f1_score(true_np, pred_np, average="macro", zero_division=0))
     weighted_f1 = float(f1_score(true_np, pred_np, average="weighted", zero_division=0))
 
-    qwk = float(cohen_kappa_score(true_np, pred_np, weights="quadratic"))
+    # 2. Quadratic Weighted Kappa (QWK)
+    # QWK measures inter-rater agreement for ordinal classification (punishing distant grade errors).
+    try:
+        qwk = float(cohen_kappa_score(true_np, pred_np, weights="quadratic"))
+        if np.isnan(qwk):
+            qwk = None
+    except Exception:
+        qwk = None
 
-    cm_5x5 = confusion_matrix(true_np, pred_np, labels=list(range(EYERIS_NUM_CLASSES)))
+    # 3. Fixed 5x5 Confusion Matrix
+    all_classes = list(range(EYERIS_NUM_CLASSES))
+    cm_5x5 = confusion_matrix(true_np, pred_np, labels=all_classes)
 
-    prec_per_class, rec_per_class, f1_per_class, supp_per_class = precision_recall_fscore_support(
-        true_np, pred_np, labels=list(range(EYERIS_NUM_CLASSES)), zero_division=0
-    )
+    # 4. Per-Class Precision, Recall, F1, and Support
+    per_class_prec = precision_score(true_np, pred_np, labels=all_classes, average=None, zero_division=0)
+    per_class_rec = recall_score(true_np, pred_np, labels=all_classes, average=None, zero_division=0)
+    per_class_f1 = f1_score(true_np, pred_np, labels=all_classes, average=None, zero_division=0)
 
     per_class_dict = {}
-    for c in range(EYERIS_NUM_CLASSES):
-        c_name = names.get(c, f"Grade {c}")
-        per_class_dict[f"class_{c}"] = {
-            "grade_index": c,
-            "label_name": c_name,
-            "precision": float(prec_per_class[c]),
-            "recall": float(rec_per_class[c]),
-            "f1_score": float(f1_per_class[c]),
-            "support": int(supp_per_class[c]),
+    for c in all_classes:
+        support = int(np.sum(true_np == c))
+        predicted_count = int(np.sum(pred_np == c))
+        c_name = class_names.get(c, f"Grade {c}")
+        per_class_dict[c_name] = {
+            "class_index": c,
+            "support": support,
+            "predicted_count": predicted_count,
+            "precision": float(per_class_prec[c]) if (predicted_count > 0 or support > 0) else None,
+            "recall": float(per_class_rec[c]) if support > 0 else None,
+            "f1_score": float(per_class_f1[c]) if support > 0 else None,
         }
 
-    # Clinical Referable DR Metrics
-    true_ref = (true_np >= referable_threshold).astype(np.int64)
-    pred_ref = (pred_np >= referable_threshold).astype(np.int64)
+    # 5. Clinical Referable DR Evaluation
+    # Grade 0 & 1 -> Non-Referable (0)
+    # Grade 2, 3, 4 -> Referable DR (1)
+    bin_true = (true_np >= referable_threshold).astype(int)
+    bin_pred = (pred_np >= referable_threshold).astype(int)
 
-    tp = int(np.sum((true_ref == 1) & (pred_ref == 1)))
-    fp = int(np.sum((true_ref == 0) & (pred_ref == 1)))
-    tn = int(np.sum((true_ref == 0) & (pred_ref == 0)))
-    fn = int(np.sum((true_ref == 1) & (pred_ref == 0)))
+    bin_cm = confusion_matrix(bin_true, bin_pred, labels=[0, 1])
+    tn, fp, fn, tp = [int(v) for v in bin_cm.ravel()]
 
     pos_true = tp + fn
     neg_true = tn + fp
     pos_pred = tp + fp
     neg_pred = tn + fn
 
+    # Distinguish unavailable metrics (None) from zero metrics (0.0)
     sensitivity = float(tp / pos_true) if pos_true > 0 else None
     specificity = float(tn / neg_true) if neg_true > 0 else None
     ppv = float(tp / pos_pred) if pos_pred > 0 else None
@@ -207,7 +237,7 @@ def compute_classification_metrics(
             "weighted_f1": weighted_f1,
             "quadratic_weighted_kappa": qwk,
             "confusion_matrix_5class": cm_5x5.tolist(),
-            "per_class": per_class_dict,
+            "per_class": per_class_dict
         },
         "referable_dr": {
             "referable_threshold_grade": referable_threshold,
@@ -220,12 +250,12 @@ def compute_classification_metrics(
             "precision_ppv": ppv,
             "npv": npv,
             "binary_accuracy": referable_acc,
-            "f1_score": referable_f1,
+            "f1_score": referable_f1
         },
         "metadata": {
             "evaluation_standard": "docs/evaluation_protocol.md",
-            "has_probabilities": y_probs is not None,
-        },
+            "has_probabilities": y_probs is not None
+        }
     }
 
     return results
